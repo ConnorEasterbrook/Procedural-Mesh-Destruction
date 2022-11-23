@@ -27,8 +27,8 @@ public class FreeCamCutter : MonoBehaviour
         mainCam = Camera.main; // Get the main camera
 
         _LINE = GetComponent<LineRenderer>(); // Get the line renderer
-        _LINE.startWidth = 0.1f; // Set the line width
-        _LINE.endWidth = 0.1f; // Set the line width
+        _LINE.startWidth = 0.01f; // Set the line width
+        _LINE.endWidth = 0.01f; // Set the line width
     }
 
     // Update is called once per frame
@@ -578,7 +578,12 @@ public class FreeCamCutter : MonoBehaviour
             col.convex = true;
         }
 
-        var rightRigidbody = secondMesh.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
+        AddRigidBody(secondMesh); // Add a rigidbody to the second mesh
+    }
+
+    private void AddRigidBody(GameObject secondMesh)
+    {
+        Rigidbody rightRigidbody = secondMesh.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
         rightRigidbody.AddRelativeForce(-slicePlane.normal * 250f); // Add a force to the second mesh in the opposite direction of the slice plane for effect
     }
 }
