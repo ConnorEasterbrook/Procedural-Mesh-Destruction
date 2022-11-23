@@ -136,7 +136,7 @@ GameObject:
   - component: {fileID: 86189600}
   - component: {fileID: 86189599}
   m_Layer: 0
-  m_Name: Cube (4)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -348,7 +348,7 @@ GameObject:
   - component: {fileID: 204110427}
   - component: {fileID: 204110426}
   m_Layer: 0
-  m_Name: Cube (5)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -590,7 +590,7 @@ GameObject:
   - component: {fileID: 318952778}
   - component: {fileID: 318952777}
   m_Layer: 0
-  m_Name: Cube (1)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -801,7 +801,7 @@ GameObject:
   - component: {fileID: 638946455}
   - component: {fileID: 638946454}
   m_Layer: 0
-  m_Name: Cube (12)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1043,7 +1043,7 @@ GameObject:
   - component: {fileID: 698953808}
   - component: {fileID: 698953807}
   m_Layer: 0
-  m_Name: Cube (2)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1234,7 +1234,7 @@ GameObject:
   - component: {fileID: 802989606}
   - component: {fileID: 802989605}
   m_Layer: 0
-  m_Name: Cube (6)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1549,7 +1549,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Size: {x: 3, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &978934941
 MeshRenderer:
@@ -1571,7 +1571,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: 3e06a038c290b6f4a8f28a93cb54e4b9, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -1614,7 +1614,7 @@ GameObject:
   - component: {fileID: 1192725495}
   - component: {fileID: 1192725494}
   m_Layer: 0
-  m_Name: Cube (10)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1826,7 +1826,7 @@ GameObject:
   - component: {fileID: 1263107856}
   - component: {fileID: 1263107855}
   m_Layer: 0
-  m_Name: Cube (7)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1923,7 +1923,7 @@ GameObject:
   - component: {fileID: 1268650065}
   - component: {fileID: 1268650064}
   m_Layer: 0
-  m_Name: Cube (3)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2304,7 +2304,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   projectile: {fileID: 6467645038308344564, guid: 1fa7d694910674741936155138a21912, type: 3}
   shootLocation: {fileID: 691355173}
-  speed: 20
+  speed: 10
 --- !u!1 &1682213480
 GameObject:
   m_ObjectHideFlags: 0
@@ -2318,7 +2318,7 @@ GameObject:
   - component: {fileID: 1682213483}
   - component: {fileID: 1682213482}
   m_Layer: 0
-  m_Name: Cube (8)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2415,7 +2415,7 @@ GameObject:
   - component: {fileID: 1849674266}
   - component: {fileID: 1849674265}
   m_Layer: 0
-  m_Name: Cube (9)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2512,7 +2512,7 @@ GameObject:
   - component: {fileID: 1895562025}
   - component: {fileID: 1895562024}
   m_Layer: 0
-  m_Name: Cube (11)
+  m_Name: FRAME
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

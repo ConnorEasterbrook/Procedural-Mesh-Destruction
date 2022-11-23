@@ -13,6 +13,8 @@ public class FreeCamCutter : MonoBehaviour
 
     // MESH CUTTING VARIABLES
     private Plane slicePlane;
+    private Vector3 mouseDownPos;
+    private Vector3 mouseUpPos;
     private static Mesh hitGameObjectMesh;
     private GeneratedMeshData mesh1;
     private GeneratedMeshData mesh2;
@@ -49,6 +51,12 @@ public class FreeCamCutter : MonoBehaviour
         {
             _POINTA = mainCam.ScreenToWorldPoint(mousePos); // Set the first point to the mouse position
             _LINE.enabled = true; // Disable the line renderer
+
+            Ray ray = mainCam.ScreenPointToRay(mousePos); // Create a ray from the mouse position
+            if (Physics.Raycast(ray, out RaycastHit hit)) // If the ray hits something
+            {
+                mouseDownPos = hit.point; // Set the mouse down position to the hit point
+            }
         }
 
         if (Input.GetMouseButton(0)) // If the left mouse button is held down
@@ -70,6 +78,12 @@ public class FreeCamCutter : MonoBehaviour
             _LINE.SetPosition(1, _POINTB); // Set the second point of the line
             _LINE.enabled = false; // Disable the line renderer
 
+            Ray ray = mainCam.ScreenPointToRay(mousePos); // Create a ray from the mouse position
+            if (Physics.Raycast(ray, out RaycastHit hit)) // If the ray hits something
+            {
+                mouseUpPos = hit.point; // Set the mouse up position to the hit point
+            }
+
             Slice(); // Call the slice method
         }
     }
@@ -79,11 +93,11 @@ public class FreeCamCutter : MonoBehaviour
     /// </summary>
     private void Slice()
     {
-        Vector3 planePoint = (_POINTA + _POINTB) / 2; // Get the center point of the line
-        Vector3 planeNormal = Vector3.Cross((_POINTA - _POINTB), _POINTA - mainCam.transform.position).normalized; // Get the normal of the plane
+        Vector3 planePoint = (mouseDownPos + mouseUpPos) / 2; // Get the center point of the line
+        Vector3 planeNormal = Vector3.Cross((mouseDownPos - mouseUpPos), mouseDownPos - mainCam.transform.position).normalized; // Get the normal of the plane
         Quaternion planeRotation = Quaternion.FromToRotation(Vector3.up, planeNormal); // Get the rotation of the plane
 
-        Collider[] colliders = Physics.OverlapBox(planePoint, new Vector3(100f, 0.01f, 100f), planeRotation); // Get all colliders within the plane
+        Collider[] colliders = Physics.OverlapBox(planePoint, new Vector3(1f, 0.01f, 1f), planeRotation); // Get all colliders within the plane
 
         foreach (Collider hitGameObject in colliders)
         {
@@ -127,14 +141,14 @@ public class FreeCamCutter : MonoBehaviour
         // Iterate through all the submeshes
         for (int i = 0; i < hitGameObjectMesh.subMeshCount; i++)
         {
-            int[] hitGameObjectSubMeshIndices = hitGameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
+            int[] hitGameObjectSubMeshTriangles = hitGameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
 
             // Iterate through the submesh indices as triangles to determine which mesh to assign them to
-            for (int j = 0; j < hitGameObjectSubMeshIndices.Length; j += 3)
+            for (int j = 0; j < hitGameObjectSubMeshTriangles.Length; j += 3)
             {
-                int triangleIndexA = hitGameObjectSubMeshIndices[j]; // Get the first index of the triangle
-                int triangleIndexB = hitGameObjectSubMeshIndices[j + 1]; // Get the second index of the triangle
-                int triangleIndexC = hitGameObjectSubMeshIndices[j + 2]; // Get the third index of the triangle
+                int triangleIndexA = hitGameObjectSubMeshTriangles[j]; // Get the first index of the triangle
+                int triangleIndexB = hitGameObjectSubMeshTriangles[j + 1]; // Get the second index of the triangle
+                int triangleIndexC = hitGameObjectSubMeshTriangles[j + 2]; // Get the third index of the triangle
 
                 // Get the data of the triangle
                 triangle = GetTriangle
