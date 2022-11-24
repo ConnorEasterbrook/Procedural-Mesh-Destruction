@@ -2,107 +2,49 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(LineRenderer))]
-public class FreeCamCutter : MonoBehaviour
+public class MeshShatter : MonoBehaviour
 {
-    // LINE RENDERER VARIABLES
-    private Camera mainCam;
-    private Vector3 _POINTA;
-    private Vector3 _POINTB;
-    private LineRenderer _LINE;
+    [Range (1, 6)] public float shatterIterations = 4;
+    private bool isShattered = false;
 
-    // MESH CUTTING VARIABLES
+    private static Mesh gameObjectMesh;
     private Plane slicePlane;
-    private Vector3 mouseDownPos;
-    private Vector3 mouseUpPos;
-    private static Mesh hitGameObjectMesh;
     private GeneratedMeshData mesh1;
     private GeneratedMeshData mesh2;
     private List<Vector3> newVertices;
     private MeshTriangleData triangle;
 
-    private void Awake()
+    // // Update is called once per frame
+    // void Update()
+    // {
+    //     if (Input.GetMouseButtonDown(0))
+    //     {
+    //         if (!isShattered)
+    //         {
+    //             for (int i = 0; i < shatterIterations; i++)
+    //             {
+    //                 Cut();
+    //             }
+
+    //             isShattered = true;
+    //         }
+    //     }
+    // }
+
+    void OnCollisionEnter(Collision collision)
     {
-        mainCam = Camera.main; // Get the main camera
-
-        _LINE = GetComponent<LineRenderer>(); // Get the line renderer
-        _LINE.startWidth = 0.01f; // Set the line width
-        _LINE.endWidth = 0.01f; // Set the line width
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        DrawLine();
-    }
-
-    /// <summary>
-    /// Track the mouse position and input to draw the cutting line
-    /// </summary>
-    private void DrawLine()
-    {
-        Vector3 mousePos = Input.mousePosition; // Get the mouse position
-        mousePos.z = -mainCam.transform.position.z; // Set the z position to the camera's z position
-
-        if (Input.GetMouseButtonDown(0)) // If the left mouse button is pressed
+        if (collision.gameObject.tag == "Projectile")
         {
-            _POINTA = mainCam.ScreenToWorldPoint(mousePos); // Set the first point to the mouse position
-            _LINE.enabled = true; // Disable the line renderer
-
-            Ray ray = mainCam.ScreenPointToRay(mousePos); // Create a ray from the mouse position
-            if (Physics.Raycast(ray, out RaycastHit hit)) // If the ray hits something
+            if (!isShattered)
             {
-                mouseDownPos = hit.point; // Set the mouse down position to the hit point
-            }
-        }
+                for (int i = 0; i < shatterIterations; i++)
+                {
+                    Cut();
+                }
 
-        if (Input.GetMouseButton(0)) // If the left mouse button is held down
-        {
-            _POINTB = mainCam.ScreenToWorldPoint(mousePos); // Set the second point to follow the mouse position
-
-            _LINE.SetPosition(0, _POINTA); // Set the first point of the line
-            _LINE.SetPosition(1, _POINTB); // Set the second point of the line
-
-            _LINE.startColor = Color.red; // Set the line color
-            _LINE.endColor = Color.red; // Set the line color
-        }
-
-        if (Input.GetMouseButtonUp(0)) // If the left mouse button is released
-        {
-            _POINTB = mainCam.ScreenToWorldPoint(mousePos); // Set the final location of the second point to the current mouse position
-
-            _LINE.SetPosition(0, _POINTA); // Set the first point of the line
-            _LINE.SetPosition(1, _POINTB); // Set the second point of the line
-            _LINE.enabled = false; // Disable the line renderer
-
-            Ray ray = mainCam.ScreenPointToRay(mousePos); // Create a ray from the mouse position
-            if (Physics.Raycast(ray, out RaycastHit hit)) // If the ray hits something
-            {
-                mouseUpPos = hit.point; // Set the mouse up position to the hit point
-            }
-
-            Slice(); // Call the slice method
-        }
-    }
-
-    /// <summary>
-    /// Slice the object using a created plane
-    /// </summary>
-    private void Slice()
-    {
-        Vector3 planePoint = (mouseDownPos + mouseUpPos) / 2; // Get the center point of the line
-        Vector3 planeNormal = Vector3.Cross((mouseDownPos - mouseUpPos), mouseDownPos - mainCam.transform.position).normalized; // Get the normal of the plane
-        Quaternion planeRotation = Quaternion.FromToRotation(Vector3.up, planeNormal); // Get the rotation of the plane
-
-        Collider[] colliders = Physics.OverlapBox(planePoint, new Vector3(1f, 0.01f, 1f), planeRotation); // Get all colliders within the plane
-
-        foreach (Collider hitGameObject in colliders)
-        {
-            MeshFilter meshFilter = hitGameObject.GetComponent<MeshFilter>(); // Get the mesh filter
-
-            if (meshFilter != null)
-            {
-                Cut(hitGameObject.gameObject, planePoint, planeNormal);
+                Destroy(gameObject);
+                Destroy(collision.gameObject);
+                // isShattered = true;
             }
         }
     }
@@ -110,16 +52,18 @@ public class FreeCamCutter : MonoBehaviour
     /// <summary>
     /// Cut the mesh using a plane
     /// </summary>
-    public void Cut(GameObject hitGameObject, Vector3 planePoint, Vector3 planeNormal)
+    public void Cut()
     {
-        // Ensure the hit gameObject is sliceable
-        if (hitGameObject.tag != "Sliceable")
-        {
-            return;
-        }
+        gameObjectMesh = GetComponent<MeshFilter>().mesh;
 
-        slicePlane = new Plane(hitGameObject.transform.InverseTransformDirection(-planeNormal), hitGameObject.transform.InverseTransformPoint(planePoint)); // Create a new plane
-        hitGameObjectMesh = hitGameObject.GetComponent<MeshFilter>().mesh; // Get the initial mesh of the hit object
+        // slicePlane = new Plane(hitGameObject.transform.InverseTransformDirection(-planeNormal), hitGameObject.transform.InverseTransformPoint(planePoint)); // Create a new plane
+
+        slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3(gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
+                                                                            UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
+                                                                            gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2));
+
+
+        gameObjectMesh = GetComponent<MeshFilter>().mesh; // Get the initial mesh of the hit object
 
         newVertices = new List<Vector3>(); // Create a new list of vertices for the new mesh caused by slicing
         mesh1 = new GeneratedMeshData(); // Create a new mesh data object for the first mesh
@@ -127,7 +71,7 @@ public class FreeCamCutter : MonoBehaviour
 
         SeparateMeshes(mesh1, mesh2); // Separate the meshes
         BeginFill();
-        CreateFirstMesh(hitGameObject);
+        CreateFirstMesh();
     }
 
     /// <summary>
@@ -136,9 +80,9 @@ public class FreeCamCutter : MonoBehaviour
     private void SeparateMeshes(GeneratedMeshData mesh1, GeneratedMeshData mesh2)
     {
         // Iterate through all the submeshes
-        for (int i = 0; i < hitGameObjectMesh.subMeshCount; i++)
+        for (int i = 0; i < gameObjectMesh.subMeshCount; i++)
         {
-            int[] hitGameObjectSubMeshTriangles = hitGameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
+            int[] hitGameObjectSubMeshTriangles = gameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
 
             // Iterate through the submesh indices as triangles to determine which mesh to assign them to
             for (int j = 0; j < hitGameObjectSubMeshTriangles.Length; j += 3)
@@ -157,9 +101,9 @@ public class FreeCamCutter : MonoBehaviour
                 );
 
                 // Check what side the submesh triangle is on the slicePlane and if it has been sliced through
-                bool triangleALeftSide = slicePlane.GetSide(hitGameObjectMesh.vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
-                bool triangleBLeftSide = slicePlane.GetSide(hitGameObjectMesh.vertices[triangleIndexB]); // Check if the second vertex of the triangle is on the left side of the plane
-                bool triangleCLeftSide = slicePlane.GetSide(hitGameObjectMesh.vertices[triangleIndexC]); // Check if the third vertex of the triangle is on the left side of the plane
+                bool triangleALeftSide = slicePlane.GetSide(gameObjectMesh.vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
+                bool triangleBLeftSide = slicePlane.GetSide(gameObjectMesh.vertices[triangleIndexB]); // Check if the second vertex of the triangle is on the left side of the plane
+                bool triangleCLeftSide = slicePlane.GetSide(gameObjectMesh.vertices[triangleIndexC]); // Check if the third vertex of the triangle is on the left side of the plane
                 switch (triangleALeftSide)
                 {
                     // All three vertices are on one side of the plane
@@ -195,9 +139,9 @@ public class FreeCamCutter : MonoBehaviour
     /// </summary>
     private static Vector3[] GetVerticesToAdd(int triangleIndexA, int triangleIndexB, int triangleIndexC)
     {
-        Vector3 vertexA = hitGameObjectMesh.vertices[triangleIndexA];
-        Vector3 vertexB = hitGameObjectMesh.vertices[triangleIndexB];
-        Vector3 vertexC = hitGameObjectMesh.vertices[triangleIndexC];
+        Vector3 vertexA = gameObjectMesh.vertices[triangleIndexA];
+        Vector3 vertexB = gameObjectMesh.vertices[triangleIndexB];
+        Vector3 vertexC = gameObjectMesh.vertices[triangleIndexC];
 
         Vector3[] verticesToAdd = { vertexA, vertexB, vertexC };
         return verticesToAdd;
@@ -208,9 +152,9 @@ public class FreeCamCutter : MonoBehaviour
     /// </summary>
     private static Vector3[] GetNormalsToAdd(int triangleIndexA, int triangleIndexB, int triangleIndexC)
     {
-        Vector3 normalA = hitGameObjectMesh.normals[triangleIndexA];
-        Vector3 normalB = hitGameObjectMesh.normals[triangleIndexB];
-        Vector3 normalC = hitGameObjectMesh.normals[triangleIndexC];
+        Vector3 normalA = gameObjectMesh.normals[triangleIndexA];
+        Vector3 normalB = gameObjectMesh.normals[triangleIndexB];
+        Vector3 normalC = gameObjectMesh.normals[triangleIndexC];
 
         Vector3[] normalsToAdd = { normalA, normalB, normalC };
         return normalsToAdd;
@@ -221,9 +165,9 @@ public class FreeCamCutter : MonoBehaviour
     /// </summary>
     private static Vector2[] GetUVsToAdd(int triangleIndexA, int triangleIndexB, int triangleIndexC)
     {
-        Vector2 uvA = hitGameObjectMesh.uv[triangleIndexA];
-        Vector2 uvB = hitGameObjectMesh.uv[triangleIndexB];
-        Vector2 uvC = hitGameObjectMesh.uv[triangleIndexC];
+        Vector2 uvA = gameObjectMesh.uv[triangleIndexA];
+        Vector2 uvB = gameObjectMesh.uv[triangleIndexB];
+        Vector2 uvC = gameObjectMesh.uv[triangleIndexC];
 
         Vector2[] uvsToAdd = { uvA, uvB, uvC };
         return uvsToAdd;
@@ -525,7 +469,7 @@ public class FreeCamCutter : MonoBehaviour
             _normals = new[] { slicePlane.normal, slicePlane.normal, slicePlane.normal }; // Set all three normals to the positive normal of the slice plane
         }
 
-        MeshTriangleData fillTriangle = new MeshTriangleData(_vertices, _normals, _uvs, hitGameObjectMesh.subMeshCount + 1); // Create a new triangle using the previous arrays
+        MeshTriangleData fillTriangle = new MeshTriangleData(_vertices, _normals, _uvs, gameObjectMesh.subMeshCount + 1); // Create a new triangle using the previous arrays
 
         // If the Dot Cross product is negative then the triangle needs to be flipped
         if (Vector3.Dot(Vector3.Cross(_vertices[1] - _vertices[0], _vertices[2] - _vertices[0]), _normals[0]) < 0)
@@ -539,19 +483,19 @@ public class FreeCamCutter : MonoBehaviour
     /// <summary>
     /// Create the new meshes after the slicing
     /// </summary>
-    private void CreateFirstMesh(GameObject hitGameObject)
+    private void CreateFirstMesh()
     {
         Mesh completeMesh1 = mesh1.GetGeneratedMesh();
 
         // Remove all current colliders on the object to avoid duplicates and update the mesh bounds
-        Collider[] originalCols = hitGameObject.GetComponents<Collider>();
+        Collider[] originalCols = GetComponents<Collider>();
         foreach (Collider col in originalCols)
         {
             Destroy(col);
         }
 
-        hitGameObject.GetComponent<MeshFilter>().mesh = completeMesh1; // Set the first object's mesh to the first mesh
-        var collider = hitGameObject.AddComponent<MeshCollider>(); // Add a mesh collider to the first object
+        GetComponent<MeshFilter>().mesh = completeMesh1; // Set the first object's mesh to the first mesh
+        var collider = gameObject.AddComponent<MeshCollider>(); // Add a mesh collider to the first object
         collider.sharedMesh = completeMesh1; // Set the collider's mesh to the first mesh
         collider.convex = true; // Set the collider to convex since convex colliders are faster
 
@@ -560,34 +504,34 @@ public class FreeCamCutter : MonoBehaviour
         // Loop through all the materials in the original mesh
         for (int i = 0; i < completeMesh1.subMeshCount; i++)
         {
-            mats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+            mats[i] = GetComponent<MeshRenderer>().material; // Set the material to the original material
         }
-        hitGameObject.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
+        GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
 
-        CreateSecondMesh(hitGameObject, mats);
+        CreateSecondMesh(mats);
     }
 
-    private void CreateSecondMesh(GameObject hitGameObject, Material[] mats)
+    private void CreateSecondMesh(Material[] mats)
     {
         Mesh completeMesh2 = mesh2.GetGeneratedMesh();
 
         GameObject secondMesh = new GameObject(); // Create a new game object for the second mesh
         secondMesh.tag = "Sliceable"; // Set the tag to sliceable
-        secondMesh.transform.position = hitGameObject.transform.position + (Vector3.up * .05f); // Set the position of the second mesh to the position of the first mesh plus a small offset
-        secondMesh.transform.rotation = hitGameObject.transform.rotation; // Set the rotation of the second mesh to the rotation of the first mesh
-        secondMesh.transform.localScale = hitGameObject.transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
+        secondMesh.transform.position = transform.position + (Vector3.up * .05f); // Set the position of the second mesh to the position of the first mesh plus a small offset
+        secondMesh.transform.rotation = transform.rotation; // Set the rotation of the second mesh to the rotation of the first mesh
+        secondMesh.transform.localScale = transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
         secondMesh.AddComponent<MeshRenderer>(); // Add a mesh renderer to the second mesh
+        secondMesh.AddComponent<MeshShatter>(); // Add a mesh shatter script to the second mesh
 
         mats = new Material[completeMesh2.subMeshCount]; // Create a new array of materials
 
         // Loop through all the materials in the original mesh
         for (int i = 0; i < completeMesh2.subMeshCount; i++)
         {
-            mats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+            mats[i] = GetComponent<MeshRenderer>().material; // Set the material to the original material
         }
         secondMesh.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
         secondMesh.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
-
         secondMesh.AddComponent<MeshCollider>().sharedMesh = completeMesh2; // Add a mesh collider to the second mesh and set the mesh to the second mesh
         var cols = secondMesh.GetComponents<MeshCollider>(); // Get all the mesh colliders on the second mesh and set them to convex since convex colliders are faster
         foreach (var col in cols)
@@ -601,6 +545,6 @@ public class FreeCamCutter : MonoBehaviour
     private void AddRigidBody(GameObject secondMesh)
     {
         Rigidbody rightRigidbody = secondMesh.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
-        rightRigidbody.AddRelativeForce(-slicePlane.normal * 250f); // Add a force to the second mesh in the opposite direction of the slice plane for effect
+        // rightRigidbody.AddRelativeForce(-slicePlane.normal * 250f); // Add a force to the second mesh in the opposite direction of the slice plane for effect
     }
 }
