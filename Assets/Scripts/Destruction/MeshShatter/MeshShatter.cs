@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MeshShatter : MonoBehaviour
 {
-    [Range (1, 6)] public float shatterIterations = 4;
+    [Range(1, 8)] public float shatterIterations = 4;
     private bool isShattered = false;
 
     private static Mesh gameObjectMesh;
@@ -14,9 +14,9 @@ public class MeshShatter : MonoBehaviour
     private List<Vector3> newVertices;
     private MeshTriangleData triangle;
 
-    // // Update is called once per frame
-    // void Update()
-    // {
+    // Update is called once per frame
+    void Update()
+    {
     //     if (Input.GetMouseButtonDown(0))
     //     {
     //         if (!isShattered)
@@ -29,7 +29,7 @@ public class MeshShatter : MonoBehaviour
     //             isShattered = true;
     //         }
     //     }
-    // }
+    }
 
     void OnCollisionEnter(Collision collision)
     {
@@ -515,13 +515,14 @@ public class MeshShatter : MonoBehaviour
     {
         Mesh completeMesh2 = mesh2.GetGeneratedMesh();
 
-        GameObject secondMesh = new GameObject(); // Create a new game object for the second mesh
-        secondMesh.tag = "Sliceable"; // Set the tag to sliceable
-        secondMesh.transform.position = transform.position + (Vector3.up * .05f); // Set the position of the second mesh to the position of the first mesh plus a small offset
-        secondMesh.transform.rotation = transform.rotation; // Set the rotation of the second mesh to the rotation of the first mesh
-        secondMesh.transform.localScale = transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
-        secondMesh.AddComponent<MeshRenderer>(); // Add a mesh renderer to the second mesh
-        secondMesh.AddComponent<MeshShatter>(); // Add a mesh shatter script to the second mesh
+        GameObject secondMeshGO = new GameObject(); // Create a new game object for the second mesh
+        secondMeshGO.tag = "Sliceable"; // Set the tag to sliceable
+        secondMeshGO.transform.position = transform.position + (Vector3.up * .05f); // Set the position of the second mesh to the position of the first mesh plus a small offset
+        secondMeshGO.transform.rotation = transform.rotation; // Set the rotation of the second mesh to the rotation of the first mesh
+        secondMeshGO.transform.localScale = transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
+        secondMeshGO.AddComponent<MeshRenderer>(); // Add a mesh renderer to the second mesh
+        secondMeshGO.AddComponent<MeshShatter>(); // Add a mesh shatter script to the second mesh
+        secondMeshGO.AddComponent<MeshSizeLimit>().isPlane = GetComponent<MeshSizeLimit>().isPlane; // Add a mesh size limit script to the second mesh
 
         mats = new Material[completeMesh2.subMeshCount]; // Create a new array of materials
 
@@ -529,17 +530,21 @@ public class MeshShatter : MonoBehaviour
         for (int i = 0; i < completeMesh2.subMeshCount; i++)
         {
             mats[i] = GetComponent<MeshRenderer>().material; // Set the material to the original material
+
+            Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
+            mats[i].color = colorPicker;
         }
-        secondMesh.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
-        secondMesh.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
-        secondMesh.AddComponent<MeshCollider>().sharedMesh = completeMesh2; // Add a mesh collider to the second mesh and set the mesh to the second mesh
-        var cols = secondMesh.GetComponents<MeshCollider>(); // Get all the mesh colliders on the second mesh and set them to convex since convex colliders are faster
+
+        secondMeshGO.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
+        secondMeshGO.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
+        secondMeshGO.AddComponent<MeshCollider>().sharedMesh = completeMesh2; // Add a mesh collider to the second mesh and set the mesh to the second mesh
+        var cols = secondMeshGO.GetComponents<MeshCollider>(); // Get all the mesh colliders on the second mesh and set them to convex since convex colliders are faster
         foreach (var col in cols)
         {
             col.convex = true;
         }
 
-        AddRigidBody(secondMesh); // Add a rigidbody to the second mesh
+        AddRigidBody(secondMeshGO); // Add a rigidbody to the second mesh
     }
 
     private void AddRigidBody(GameObject secondMesh)
