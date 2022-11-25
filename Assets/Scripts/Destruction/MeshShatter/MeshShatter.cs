@@ -54,10 +54,9 @@ public class MeshShatter : MonoBehaviour
     /// </summary>
     public void Cut()
     {
-        gameObjectMesh = GetComponent<MeshFilter>().mesh;
+        gameObjectMesh = GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
 
-        // slicePlane = new Plane(hitGameObject.transform.InverseTransformDirection(-planeNormal), hitGameObject.transform.InverseTransformPoint(planePoint)); // Create a new plane
-
+        // Create a plane at a random point on the mesh
         slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3(gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
                                                                             UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
                                                                             gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2));
@@ -538,6 +537,7 @@ public class MeshShatter : MonoBehaviour
         secondMeshGO.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
         secondMeshGO.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
         secondMeshGO.AddComponent<MeshCollider>().sharedMesh = completeMesh2; // Add a mesh collider to the second mesh and set the mesh to the second mesh
+
         var cols = secondMeshGO.GetComponents<MeshCollider>(); // Get all the mesh colliders on the second mesh and set them to convex since convex colliders are faster
         foreach (var col in cols)
         {
