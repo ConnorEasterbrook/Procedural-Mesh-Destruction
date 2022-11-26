@@ -22,6 +22,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class FirstPersonController : MonoBehaviour
@@ -103,6 +104,7 @@ public class FirstPersonController : MonoBehaviour
     {
         DefaultMovement();
         CameraMovement();
+        Animation();
     }
 
     private void DefaultMovement()
@@ -190,5 +192,18 @@ public class FirstPersonController : MonoBehaviour
         // Keep camera rotation smooth and correct, stopping camera rolling
         transform.eulerAngles = Vector3.up * cameraPanSmooth;
         playerCamera.transform.localEulerAngles = Vector3.right * cameraTiltSmooth;
+    }
+
+    private async void Animation()
+    {
+        Animator _animator = GetComponent<Animator>();
+
+        if(Input.GetMouseButtonDown(0))
+        {
+            _animator.SetBool("topAttackDown", true);
+
+            await Task.Delay(500);
+            _animator.SetBool("topAttackDown", false);
+        }
     }
 }
