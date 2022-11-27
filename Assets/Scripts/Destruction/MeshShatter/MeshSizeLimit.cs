@@ -28,7 +28,7 @@ namespace Connoreaster
 {
     public class MeshSizeLimit : MonoBehaviour
     {
-        [Range(0.5f, 2.5f)] public float minShapeSize = 1.75f; // Set the minimum size of the shape
+        private float minShapeSize = 1.75f; // Set the minimum size of the shape
         public bool isPlane = false;
 
         // Update is called once per frame

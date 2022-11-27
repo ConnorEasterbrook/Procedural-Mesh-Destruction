@@ -32,8 +32,8 @@ namespace Connoreaster
         public bool trackMouseMovement = false; // Set to true to track mouse movement
         public GameObject mouseTrackingObject; // Set the object to track the mouse movement
         public float trackSensitivity = 50f; // Set the sensitivity of the mouse tracking
-        public FPCharSlice FPSliceScript; // Set the FPSlice script
         private Vector3 mouseDownPos; // Set the mouse down position
+        public FirstPersonController player; // Set the player object
 
         [Header("Ray Point")]
         public bool rayPoint = false; // Set to true to raycast a point
@@ -71,33 +71,37 @@ namespace Connoreaster
                 {
                     if (Input.mousePosition.x > mouseDownPos.x && swipeDistanceX > trackSensitivity)
                     {
-                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, -45); // Rotate the object to the top right
+                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, -45); 
+                        player.Animation("bottomLeftAttackUp");
 
-                        // Vector3 rotation = new Vector3(Camera.main.transform.rotation.eulerAngles.x, Camera.main.transform.rotation.eulerAngles.y, -45); // Set the rotation of the mouse tracking object
-                        // FPSliceScript.Slice(mouseTrackingObject, rotation); // Cut the object
                     }
                     else if (Input.mousePosition.x < mouseDownPos.x && swipeDistanceX < -trackSensitivity)
                     {
-                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 45); // Rotate the object to the top left
+                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 45); 
+                        player.Animation("bottomRightAttackUp");
                     }
                     else
                     {
-                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 0); // Rotate the object to the top
+                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 0);
+                        player.Animation("bottomAttackUp");
                     }
                 }
                 else if (Input.mousePosition.y < mouseDownPos.y && swipeDistanceY < -trackSensitivity)
                 {
                     if (Input.mousePosition.x > mouseDownPos.x && swipeDistanceX > trackSensitivity)
                     {
-                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, -135); // Rotate the object to the bottom right
+                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, -135); 
+                        player.Animation("topLeftAttackDown");
                     }
                     else if (Input.mousePosition.x < mouseDownPos.x && swipeDistanceX < -trackSensitivity)
                     {
-                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 135); // Rotate the object to the bottom left
+                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 135); 
+                        player.Animation("topRightAttackDown");
                     }
                     else
                     {
-                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 180); // Rotate the object to the bottom
+                        mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 180); 
+                        player.Animation("topAttackDown");
                     }
                 }
                 else
@@ -105,10 +109,12 @@ namespace Connoreaster
                     if (Input.mousePosition.x > mouseDownPos.x && swipeDistanceX > trackSensitivity)
                     {
                         mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, -90); // Rotate the object to the right
+                        player.Animation("rightAttackLeft");
                     }
                     else if (Input.mousePosition.x < mouseDownPos.x && swipeDistanceX < -trackSensitivity)
                     {
                         mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 90); // Rotate the object to the left
+                        player.Animation("leftAttackRight");
                     }
                 }
 

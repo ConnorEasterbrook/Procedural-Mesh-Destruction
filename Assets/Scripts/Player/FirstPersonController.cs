@@ -104,7 +104,7 @@ public class FirstPersonController : MonoBehaviour
     {
         DefaultMovement();
         CameraMovement();
-        Animation();
+        // Animation();
     }
 
     private void DefaultMovement()
@@ -194,16 +194,30 @@ public class FirstPersonController : MonoBehaviour
         playerCamera.transform.localEulerAngles = Vector3.right * cameraTiltSmooth;
     }
 
-    private async void Animation()
+    [Header("Animation")]
+    public Collider swordCollider;
+
+    public async void Animation(string attackName)
     {
         Animator _animator = GetComponent<Animator>();
 
-        if(Input.GetMouseButtonDown(0))
-        {
-            _animator.SetBool("topAttackDown", true);
+        // if (Input.GetMouseButtonDown(0))
+        // {
+        // _animator.SetBool("topAttackDown", true);
+        // swordCollider.enabled = true;
 
-            await Task.Delay(500);
-            _animator.SetBool("topAttackDown", false);
-        }
+        // await Task.Delay(1000);
+        // _animator.SetBool("topAttackDown", false);
+        // swordCollider.enabled = false;
+        // }
+
+        _animator.SetBool("attacking", true);
+        _animator.SetBool("isMelee", true);
+        _animator.SetBool(attackName, true);
+        swordCollider.enabled = true;
+
+        await Task.Delay(1000);
+        _animator.SetBool(attackName, false);
+        swordCollider.enabled = false;
     }
 }
