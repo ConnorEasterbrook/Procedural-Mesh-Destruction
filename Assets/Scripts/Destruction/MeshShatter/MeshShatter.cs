@@ -30,6 +30,8 @@ namespace Connoreaster
     {
         [Range(1, 8)] public float shatterIterations = 4;
         private bool isShattered = false;
+        public float explodeForce = 250f;
+        public bool debugColour = false;
 
         private static Mesh gameObjectMesh;
         private Plane slicePlane;
@@ -81,16 +83,15 @@ namespace Connoreaster
             gameObjectMesh = GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
 
             // Create a plane at a random point on the mesh
-            slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3(gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
-                                                                                UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
-                                                                                gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2));
-
-
-
+            slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3
+            (
+                gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
+                UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y), 
+                gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2
+            ));
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(gameObject, slicePlane); // Call the mesh cut calculations script
-            calc.AddShatter(); // Add the shatter effect
+            calc.CallScript(gameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
         }
     }
 }

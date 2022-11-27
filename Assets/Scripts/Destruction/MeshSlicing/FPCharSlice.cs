@@ -35,7 +35,8 @@ namespace Connoreaster
         private List<Vector3> newVertices;
         private MeshTriangleData triangle;
 
-        public GameObject test;
+        public float explodeForce = 250f;
+        public bool debugColour = false;
 
 
 
@@ -44,6 +45,20 @@ namespace Connoreaster
         private Vector3 enterPos;
         private Vector3 baseEnterPos;
         private Vector3 exitPos;
+
+        private void Update()
+        {
+            // if (Input.GetMouseButtonDown(0))
+            // {
+            //     enterPos = tip.transform.position;
+            //     baseEnterPos = baseOfWeapon.transform.position;
+            // }
+            // if (Input.GetMouseButtonUp(0))
+            // {
+            //     exitPos = tip.transform.position;
+            //     Cut();
+            // }
+        }
 
         private void OnTriggerEnter(Collider other)
         {
@@ -89,7 +104,6 @@ namespace Connoreaster
         /// <summary>
         /// Cut the mesh using a plane
         /// </summary>
-        // private void Cut(GameObject hitGameObject, Vector3 planePoint, Vector3 planeNormal)
         private void Cut(GameObject hitGameObject)
         {
             // Ensure the hit gameObject is sliceable
@@ -98,14 +112,8 @@ namespace Connoreaster
                 return;
             }
 
-            // test.transform.rotation = Quaternion.Euler(planeNormal); // Rotate the object to the top right
-            // test.transform.position = planePoint; // Set the position of the object
-
-            // slicePlane = new Plane(planeNormal, planePoint); // Create a new plane
-
-
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitGameObject, slicePlane); // Call the mesh cut calculations script
+            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
         }
     }
 }

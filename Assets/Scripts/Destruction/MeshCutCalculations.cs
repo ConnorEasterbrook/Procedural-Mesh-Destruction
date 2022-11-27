@@ -35,14 +35,18 @@ namespace Connoreaster
         private List<Vector3> newVertices;
         private MeshTriangleData triangle;
         private GameObject secondMeshGO;
+        private float explodeForce = 250f;
+        private bool debugColour = false;
 
-        public void CallScript(GameObject _sentGameObject, Plane _slicePlane)
+        public void CallScript(GameObject _sentGameObject, Plane _slicePlane, float _explodeForce, bool _debugColour)
         {
             sentGameObjectMesh = _sentGameObject.GetComponent<MeshFilter>().mesh;
             slicePlane = _slicePlane;
             mesh1 = new GeneratedMeshData(); // Create a new mesh data object for the first mesh
             mesh2 = new GeneratedMeshData(); // Create a new mesh data object for the second mesh
             newVertices = new List<Vector3>(); // Create a new list of vertices for the new mesh caused by slicing
+            explodeForce = _explodeForce;
+            debugColour = _debugColour;
 
             SeparateMeshes(mesh1, mesh2); // Separate the meshes
             BeginFill();
@@ -497,12 +501,32 @@ namespace Connoreaster
             secondMeshGO.transform.localScale = hitGameObject.transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
             secondMeshGO.AddComponent<MeshRenderer>(); // Add a mesh renderer to the second mesh
 
+            if (hitGameObject.GetComponent<MeshShatter>() != null)
+            {
+                secondMeshGO.AddComponent<MeshShatter>().debugColour = debugColour; // Add a mesh shatter script to the second mesh if the original mesh has one
+            }
+
+            if (hitGameObject.GetComponent<MeshSizeLimit>() == null)
+            {
+                secondMeshGO.AddComponent<MeshSizeLimit>(); // Add a mesh size limit script to the second mesh if the original mesh doesn't have one
+            }
+            else
+            {
+                secondMeshGO.AddComponent<MeshSizeLimit>().isPlane = hitGameObject.GetComponent<MeshSizeLimit>().isPlane; // Add a mesh size limit script to the second mesh
+            }
+
             mats = new Material[completeMesh2.subMeshCount]; // Create a new array of materials
 
             // Loop through all the materials in the original mesh
             for (int i = 0; i < completeMesh2.subMeshCount; i++)
             {
                 mats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+
+                if (debugColour)
+                {
+                    Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
+                    mats[i].color = colorPicker;
+                }
             }
             secondMeshGO.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
             secondMeshGO.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
@@ -520,12 +544,7 @@ namespace Connoreaster
         private void AddRigidBody(GameObject secondMesh)
         {
             Rigidbody rightRigidbody = secondMesh.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
-            rightRigidbody.AddRelativeForce(-slicePlane.normal * 250f); // Add a force to the second mesh in the opposite direction of the slice plane for effect
-        }
-        public void AddShatter()
-        {
-            secondMeshGO.AddComponent<MeshShatter>(); // Add a mesh shatter script to the second mesh
-            secondMeshGO.AddComponent<MeshSizeLimit>().isPlane = GetComponent<MeshSizeLimit>().isPlane; // Add a mesh size limit script to the second mesh
+            rightRigidbody.AddRelativeForce(-slicePlane.normal * explodeForce); // Add a force to the second mesh in the opposite direction of the slice plane for effect
         }
     }
 }

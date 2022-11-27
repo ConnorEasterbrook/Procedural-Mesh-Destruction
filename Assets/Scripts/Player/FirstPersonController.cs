@@ -22,6 +22,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public class FirstPersonController : MonoBehaviour
@@ -103,6 +104,7 @@ public class FirstPersonController : MonoBehaviour
     {
         DefaultMovement();
         CameraMovement();
+        WeaponChange();
     }
 
     private void DefaultMovement()
@@ -190,5 +192,59 @@ public class FirstPersonController : MonoBehaviour
         // Keep camera rotation smooth and correct, stopping camera rolling
         transform.eulerAngles = Vector3.up * cameraPanSmooth;
         playerCamera.transform.localEulerAngles = Vector3.right * cameraTiltSmooth;
+    }
+
+    [Header("Animation")]
+    public Collider swordCollider;
+    public Collider gunCollider;
+    private bool sword = true;
+    // private bool gun = false;
+
+    private void WeaponChange()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            // gun = false;
+            sword = true;
+
+            gunCollider.gameObject.SetActive(false);
+            swordCollider.gameObject.SetActive(true);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            sword = false;
+            // gun = true;
+
+            swordCollider.gameObject.SetActive(false);
+            gunCollider.gameObject.SetActive(true);
+        }
+    }
+
+    
+
+    public async void Animation(string attackName)
+    {
+        Animator _animator = GetComponent<Animator>();
+
+        _animator.SetBool("attacking", true);
+
+        if (sword)
+        {
+            _animator.SetBool("isRanged", false);
+            _animator.SetBool("isMelee", true);
+        }
+        else
+        {
+            _animator.SetBool("isMelee", false);
+            _animator.SetBool("isRanged", true);
+        }
+
+
+        _animator.SetBool(attackName, true);
+        swordCollider.enabled = true;
+
+        await Task.Delay(1000);
+        _animator.SetBool(attackName, false);
+        swordCollider.enabled = false;
     }
 }
