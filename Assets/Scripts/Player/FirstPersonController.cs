@@ -104,7 +104,7 @@ public class FirstPersonController : MonoBehaviour
     {
         DefaultMovement();
         CameraMovement();
-        // Animation();
+        WeaponChange();
     }
 
     private void DefaultMovement()
@@ -196,23 +196,50 @@ public class FirstPersonController : MonoBehaviour
 
     [Header("Animation")]
     public Collider swordCollider;
+    public Collider gunCollider;
+    private bool sword = true;
+    private bool gun;
+
+    private void WeaponChange()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            gun = false;
+            sword = true;
+
+            gunCollider.gameObject.SetActive(false);
+            swordCollider.gameObject.SetActive(true);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            sword = false;
+            gun = true;
+
+            swordCollider.gameObject.SetActive(false);
+            gunCollider.gameObject.SetActive(true);
+        }
+    }
+
+    
 
     public async void Animation(string attackName)
     {
         Animator _animator = GetComponent<Animator>();
 
-        // if (Input.GetMouseButtonDown(0))
-        // {
-        // _animator.SetBool("topAttackDown", true);
-        // swordCollider.enabled = true;
-
-        // await Task.Delay(1000);
-        // _animator.SetBool("topAttackDown", false);
-        // swordCollider.enabled = false;
-        // }
-
         _animator.SetBool("attacking", true);
-        _animator.SetBool("isMelee", true);
+
+        if (sword)
+        {
+            _animator.SetBool("isRanged", false);
+            _animator.SetBool("isMelee", true);
+        }
+        else
+        {
+            _animator.SetBool("isMelee", false);
+            _animator.SetBool("isRanged", true);
+        }
+
+
         _animator.SetBool(attackName, true);
         swordCollider.enabled = true;
 

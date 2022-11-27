@@ -109,12 +109,12 @@ namespace Connoreaster
                     if (Input.mousePosition.x > mouseDownPos.x && swipeDistanceX > trackSensitivity)
                     {
                         mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, -90); // Rotate the object to the right
-                        player.Animation("rightAttackLeft");
+                        player.Animation("leftAttackRight");
                     }
                     else if (Input.mousePosition.x < mouseDownPos.x && swipeDistanceX < -trackSensitivity)
                     {
                         mouseTrackingObject.transform.localRotation = Quaternion.Euler(0, 0, 90); // Rotate the object to the left
-                        player.Animation("leftAttackRight");
+                        player.Animation("rightAttackLeft");
                     }
                 }
 
