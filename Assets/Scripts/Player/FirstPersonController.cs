@@ -198,13 +198,13 @@ public class FirstPersonController : MonoBehaviour
     public Collider swordCollider;
     public Collider gunCollider;
     private bool sword = true;
-    private bool gun;
+    // private bool gun = false;
 
     private void WeaponChange()
     {
         if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            gun = false;
+            // gun = false;
             sword = true;
 
             gunCollider.gameObject.SetActive(false);
@@ -213,7 +213,7 @@ public class FirstPersonController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Alpha2))
         {
             sword = false;
-            gun = true;
+            // gun = true;
 
             swordCollider.gameObject.SetActive(false);
             gunCollider.gameObject.SetActive(true);
