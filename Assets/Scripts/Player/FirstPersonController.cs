@@ -230,21 +230,19 @@ public class FirstPersonController : MonoBehaviour
 
         if (sword)
         {
-            _animator.SetBool("isRanged", false);
+            // _animator.SetBool("isRanged", false);
             _animator.SetBool("isMelee", true);
         }
         else
         {
             _animator.SetBool("isMelee", false);
-            _animator.SetBool("isRanged", true);
+            // _animator.SetBool("isRanged", true);
         }
 
 
         _animator.SetBool(attackName, true);
-        swordCollider.enabled = true;
 
         await Task.Delay(1000);
         _animator.SetBool(attackName, false);
-        swordCollider.enabled = false;
     }
 }

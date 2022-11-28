@@ -22,11 +22,13 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Connoreaster
 {
-    public class MeshCutCalculations : MonoBehaviour
+    public class MeshCutCalculations
     {
         private static Mesh sentGameObjectMesh;
         private Plane slicePlane;
@@ -47,6 +49,7 @@ namespace Connoreaster
             newVertices = new List<Vector3>(); // Create a new list of vertices for the new mesh caused by slicing
             explodeForce = _explodeForce;
             debugColour = _debugColour;
+
 
             SeparateMeshes(mesh1, mesh2); // Separate the meshes
             BeginFill();
@@ -70,14 +73,8 @@ namespace Connoreaster
                     int triangleIndexB = hitGameObjectSubMeshTriangles[j + 1]; // Get the second index of the triangle
                     int triangleIndexC = hitGameObjectSubMeshTriangles[j + 2]; // Get the third index of the triangle
 
-                    // Get the data of the triangle
-                    triangle = GetTriangle
-                    (
-                        GetVerticesToAdd(triangleIndexA, triangleIndexB, triangleIndexC),
-                        GetNormalsToAdd(triangleIndexA, triangleIndexB, triangleIndexC),
-                        GetUVsToAdd(triangleIndexA, triangleIndexB, triangleIndexC),
-                        i
-                    );
+                    // Get the vertices of the triangle
+                    triangle = GetTriangle(triangleIndexA, triangleIndexB, triangleIndexC, i);
 
                     // Check what side the submesh triangle is on the slicePlane and if it has been sliced through
                     bool triangleALeftSide = slicePlane.GetSide(sentGameObjectMesh.vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
@@ -104,52 +101,33 @@ namespace Connoreaster
             }
         }
 
-        /// <summary>
-        /// Gets the triangle data and stores it in a MeshTriangleData struct
-        /// </summary>
-        private static MeshTriangleData GetTriangle(Vector3[] vertices, Vector3[] normals, Vector2[] uvs, int submeshIndex)
+        private MeshTriangleData GetTriangle(int _triangleIndexA, int _triangleIndexB, int _triangleIndexC, int _submeshIndex)
         {
-            MeshTriangleData triangle = new MeshTriangleData(vertices, normals, uvs, submeshIndex);
-            return triangle;
-        }
+            //Adding the Vertices at the triangleIndex
+            Vector3[] verticesToAdd =
+            {
+                sentGameObjectMesh.vertices[_triangleIndexA],
+                sentGameObjectMesh.vertices[_triangleIndexB],
+                sentGameObjectMesh.vertices[_triangleIndexC]
+            };
 
-        /// <summary>
-        /// Gets the vertices of the triangle
-        /// </summary>
-        private static Vector3[] GetVerticesToAdd(int triangleIndexA, int triangleIndexB, int triangleIndexC)
-        {
-            Vector3 vertexA = sentGameObjectMesh.vertices[triangleIndexA];
-            Vector3 vertexB = sentGameObjectMesh.vertices[triangleIndexB];
-            Vector3 vertexC = sentGameObjectMesh.vertices[triangleIndexC];
+            //Adding the normals at the triangle index
+            Vector3[] normalsToAdd =
+            {
+                sentGameObjectMesh.normals[_triangleIndexA],
+                sentGameObjectMesh.normals[_triangleIndexB],
+                sentGameObjectMesh.normals[_triangleIndexC]
+            };
 
-            Vector3[] verticesToAdd = { vertexA, vertexB, vertexC };
-            return verticesToAdd;
-        }
+            //adding the uvs at the triangleIndex
+            Vector2[] uvsToAdd =
+            {
+                sentGameObjectMesh.uv[_triangleIndexA],
+                sentGameObjectMesh.uv[_triangleIndexB],
+                sentGameObjectMesh.uv[_triangleIndexC]
+            };
 
-        /// <summary>
-        /// Gets the normals of the triangle
-        /// </summary>
-        private static Vector3[] GetNormalsToAdd(int triangleIndexA, int triangleIndexB, int triangleIndexC)
-        {
-            Vector3 normalA = sentGameObjectMesh.normals[triangleIndexA];
-            Vector3 normalB = sentGameObjectMesh.normals[triangleIndexB];
-            Vector3 normalC = sentGameObjectMesh.normals[triangleIndexC];
-
-            Vector3[] normalsToAdd = { normalA, normalB, normalC };
-            return normalsToAdd;
-        }
-
-        /// <summary>
-        /// Gets the UVs of the triangle
-        /// </summary>
-        private static Vector2[] GetUVsToAdd(int triangleIndexA, int triangleIndexB, int triangleIndexC)
-        {
-            Vector2 uvA = sentGameObjectMesh.uv[triangleIndexA];
-            Vector2 uvB = sentGameObjectMesh.uv[triangleIndexB];
-            Vector2 uvC = sentGameObjectMesh.uv[triangleIndexC];
-
-            Vector2[] uvsToAdd = { uvA, uvB, uvC };
-            return uvsToAdd;
+            return new MeshTriangleData(verticesToAdd, normalsToAdd, uvsToAdd, _submeshIndex);
         }
 
         /// <summary>
@@ -294,25 +272,17 @@ namespace Connoreaster
                 // If the Dot Cross product is negative then the triangle needs to be flipped
                 if (Vector3.Dot(Vector3.Cross(updatedVertices[1] - updatedVertices[0], updatedVertices[2] - updatedVertices[0]), updatedNormals[0]) < 0)
                 {
-                    FlipTriangle(testTriangle); // Flip the triangle
+                    Vector3 temp = testTriangle.Vertices[2]; // Store the third vertex
+                    testTriangle.Vertices[2] = testTriangle.Vertices[0]; // Set the third vertex to the first vertex
+                    testTriangle.Vertices[0] = temp; // Set the first vertex to the previous third vertex position
+
+                    temp = testTriangle.Normals[2]; // Store the third normal
+                    testTriangle.Normals[2] = testTriangle.Normals[0]; // Set the third normal to the first normal
+                    testTriangle.Normals[0] = temp; // Set the first normal to the previous third normal position
                 }
 
                 mesh.AddTriangle(testTriangle); // Add the triangle to the mesh
             }
-        }
-
-        /// <summary>
-        /// Flips the triangle by swapping the first and third vertices
-        /// </summary>
-        private static void FlipTriangle(MeshTriangleData testTriangle)
-        {
-            Vector3 temp = testTriangle.Vertices[2]; // Store the third vertex
-            testTriangle.Vertices[2] = testTriangle.Vertices[0]; // Set the third vertex to the first vertex
-            testTriangle.Vertices[0] = temp; // Set the first vertex to the previous third vertex position
-
-            temp = testTriangle.Normals[2]; // Store the third normal
-            testTriangle.Normals[2] = testTriangle.Normals[0]; // Set the third normal to the first normal
-            testTriangle.Normals[0] = temp; // Set the first normal to the previous third normal position
         }
 
         /// <summary>
@@ -409,8 +379,8 @@ namespace Connoreaster
                 // Set the UVs to the dot product of the displacement and the left and up axes
                 uv1 = new Vector2()
                 {
-                    x = .5f + Vector3.Dot(displacement, left),
-                    y = .5f + Vector3.Dot(displacement, up)
+                    x = 0.5f + Vector3.Dot(displacement, left),
+                    y = 0.5f + Vector3.Dot(displacement, up)
                 };
 
                 displacement = vertices[(i + 1) % vertices.Count] - centerPosition; // Set the displacement to the difference between the next vertex and the center position
@@ -453,7 +423,13 @@ namespace Connoreaster
             // If the Dot Cross product is negative then the triangle needs to be flipped
             if (Vector3.Dot(Vector3.Cross(_vertices[1] - _vertices[0], _vertices[2] - _vertices[0]), _normals[0]) < 0)
             {
-                FlipTriangle(fillTriangle); // Flip the triangle
+                Vector3 temp = fillTriangle.Vertices[2]; // Store the third vertex
+                fillTriangle.Vertices[2] = fillTriangle.Vertices[0]; // Set the third vertex to the first vertex
+                fillTriangle.Vertices[0] = temp; // Set the first vertex to the previous third vertex position
+
+                temp = fillTriangle.Normals[2]; // Store the third normal
+                fillTriangle.Normals[2] = fillTriangle.Normals[0]; // Set the third normal to the first normal
+                fillTriangle.Normals[0] = temp; // Set the first normal to the previous third normal position
             }
 
             mesh.AddTriangle(fillTriangle); // Add the triangle to the second mesh
@@ -470,7 +446,7 @@ namespace Connoreaster
             Collider[] originalCols = hitGameObject.GetComponents<Collider>();
             foreach (Collider col in originalCols)
             {
-                Destroy(col);
+                MonoBehaviour.Destroy(col);
             }
 
             hitGameObject.GetComponent<MeshFilter>().mesh = completeMesh1; // Set the first object's mesh to the first mesh
@@ -486,6 +462,11 @@ namespace Connoreaster
                 mats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
             }
             hitGameObject.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
+
+            if (hitGameObject.GetComponent<MeshSizeLimit>() == null)
+            {
+                hitGameObject.AddComponent<MeshSizeLimit>(); // Add a mesh size limit script to the second mesh if the original mesh doesn't have one
+            }
 
             CreateSecondMesh(hitGameObject, mats);
         }

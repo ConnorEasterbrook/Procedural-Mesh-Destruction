@@ -26,30 +26,54 @@ using UnityEngine;
 
 namespace Connoreaster
 {
-    public class FPCharSlice : MonoBehaviour
+    public class CamDragSlicer : MonoBehaviour
     {
+        // LINE RENDERER VARIABLES
+        public GameObject ball;
+        public LayerMask layerMask;
+        private Collider _collider;
+
+        // MESH CUTTING VARIABLES
         private Plane slicePlane;
+        private Vector3 mousePoint;
         public float explodeForce = 250f;
         public bool debugColour = false;
-
+        private bool slicing;
         public GameObject tip;
         public GameObject baseOfWeapon;
         private Vector3 enterPos;
         private Vector3 baseEnterPos;
         private Vector3 exitPos;
+        private ParticleSystem ps;
 
-        private void Update()
+        private void Awake()
         {
-            // if (Input.GetMouseButtonDown(0))
-            // {
-            //     enterPos = tip.transform.position;
-            //     baseEnterPos = baseOfWeapon.transform.position;
-            // }
-            // if (Input.GetMouseButtonUp(0))
-            // {
-            //     exitPos = tip.transform.position;
-            //     Cut();
-            // }
+            _collider = ball.GetComponent<Collider>();
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                _collider.enabled = true;
+                slicing = true;
+            }
+            else if (Input.GetMouseButtonUp(0))
+            {
+                _collider.enabled = false;
+                slicing = false;
+            }
+
+            if (slicing)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit, 1000, layerMask))
+                {
+                    mousePoint = hit.point;
+                    ball.transform.position = hit.point;
+                }
+            }
         }
 
         private void OnTriggerEnter(Collider other)
@@ -104,8 +128,14 @@ namespace Connoreaster
                 return;
             }
 
-            MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
+            if (hitGameObject.GetComponent<MeshSizeLimit>() == null)
+            {
+                ps = hitGameObject.GetComponentInChildren<ParticleSystem>();
+                ps.Play();
+                MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
+                calc.CallScript(hitGameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
+            }
+
         }
     }
 }

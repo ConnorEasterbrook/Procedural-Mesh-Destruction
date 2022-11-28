@@ -39,11 +39,6 @@ namespace Connoreaster
         private Plane slicePlane;
         private Vector3 mouseDownPos;
         private Vector3 mouseUpPos;
-        private static Mesh hitGameObjectMesh;
-        private GeneratedMeshData mesh1;
-        private GeneratedMeshData mesh2;
-        private List<Vector3> newVertices;
-        private MeshTriangleData triangle;
         public float explodeForce = 250f;
         public bool debugColour = false;
 
