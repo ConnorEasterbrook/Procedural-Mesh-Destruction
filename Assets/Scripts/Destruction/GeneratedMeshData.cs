@@ -30,7 +30,7 @@ namespace Connoreaster
     {
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
-        List<Vector2> uvs = new List<Vector2>();
+        List<Vector2> uv = new List<Vector2>();
         List<List<int>> submeshIndices = new List<List<int>>();
 
         public void AddTriangle(MeshTriangleData _triangle)
@@ -39,7 +39,7 @@ namespace Connoreaster
 
             vertices.AddRange(_triangle.Vertices);
             normals.AddRange(_triangle.Normals);
-            uvs.AddRange(_triangle.UVs);
+            uv.AddRange(_triangle.UVs);
 
             if (submeshIndices.Count < _triangle.SubmeshIndex + 1)
             {
@@ -61,7 +61,7 @@ namespace Connoreaster
 
             vertices.AddRange(_vertices);
             normals.AddRange(_normals);
-            uvs.AddRange(_uvs);
+            uv.AddRange(_uvs);
 
             if (submeshIndices.Count < _submeshIndex + 1)
             {
@@ -82,8 +82,8 @@ namespace Connoreaster
             Mesh mesh = new Mesh();
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);
-            mesh.SetUVs(0, uvs);
-            mesh.SetUVs(1, uvs);
+            mesh.SetUVs(0, uv);
+            mesh.SetUVs(1, uv);
 
             mesh.subMeshCount = submeshIndices.Count;
             for (int i = 0; i < submeshIndices.Count; i++)
