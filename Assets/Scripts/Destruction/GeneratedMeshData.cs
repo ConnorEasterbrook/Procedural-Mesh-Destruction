@@ -37,13 +37,13 @@ namespace Connoreaster
         {
             int currentVerticeCount = vertices.Count;
 
-            vertices.AddRange(_triangle.Vertices);
-            normals.AddRange(_triangle.Normals);
+            vertices.AddRange(_triangle.vertices);
+            normals.AddRange(_triangle.normals);
             uv.AddRange(_triangle.UVs);
 
-            if (submeshIndices.Count < _triangle.SubmeshIndex + 1)
+            if (submeshIndices.Count < _triangle.subMeshIndex + 1)
             {
-                for (int i = submeshIndices.Count; i < _triangle.SubmeshIndex + 1; i++)
+                for (int i = submeshIndices.Count; i < _triangle.subMeshIndex + 1; i++)
                 {
                     submeshIndices.Add(new List<int>());
                 }
@@ -51,7 +51,7 @@ namespace Connoreaster
 
             for (int i = 0; i < 3; i++)
             {
-                submeshIndices[_triangle.SubmeshIndex].Add(currentVerticeCount + i);
+                submeshIndices[_triangle.subMeshIndex].Add(currentVerticeCount + i);
             }
         }
 
