@@ -30,17 +30,17 @@ namespace Connoreaster
     {
         private int submeshIndex;
 
-        public List<Vector3> Vertices { get; set; } = new();
-        public List<Vector3> Normals { get; set; } = new();
+        public List<Vector3> vertices { get; set; } = new();
+        public List<Vector3> normals { get; set; } = new();
         public List<Vector2> UVs { get; set; } = new();
-        public int SubmeshIndex { get => submeshIndex; private set => SubmeshIndex = value; }
+        public int subMeshIndex { get => submeshIndex; private set => subMeshIndex = value; }
 
         public MeshTriangleData(Vector3[] _vertices, Vector3[] _normals, Vector2[] _uvs, int _submeshIndex)
         {
             Clear();
 
-            Vertices.AddRange(_vertices);
-            Normals.AddRange(_normals);
+            vertices.AddRange(_vertices);
+            normals.AddRange(_normals);
             UVs.AddRange(_uvs);
 
             submeshIndex = _submeshIndex;
@@ -48,8 +48,8 @@ namespace Connoreaster
 
         private void Clear()
         {
-            Vertices.Clear();
-            Normals.Clear();
+            vertices.Clear();
+            normals.Clear();
             UVs.Clear();
 
             submeshIndex = 0;
