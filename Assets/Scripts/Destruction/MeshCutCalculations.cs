@@ -52,179 +52,10 @@ namespace Connoreaster
             explodeForce = _explodeForce;
             debugColour = _debugColour;
 
-            // SeparateMeshes(mesh1, mesh2);
-            // BeginFill();
-            // CreateFirstMesh(_sentGameObject);
-            CalcJobOne(_sentGameObject); // Start the first job
+            SeparateMeshes(mesh1, mesh2);
+            BeginFill();
+            CreateFirstMesh(_sentGameObject);
         }
-
-        private Vector3[] _vertices = new Vector3[3];
-        private Vector3[] _normals = new Vector3[3];
-        private Vector2[] _uvs = new Vector2[3];
-
-        private void CalcJobOne(GameObject _sentGameObject)
-        {
-            int submeshCount = sentGameObjectMesh.subMeshCount;
-            
-            JobHandle dependency = new JobHandle();
-
-            NativeArray<Vector3> verts = new NativeArray<Vector3>(sentGameObjectMesh.vertices, Allocator.TempJob);
-            NativeArray<Vector3> norms = new NativeArray<Vector3>(sentGameObjectMesh.normals, Allocator.TempJob);
-            NativeArray<Vector2> uvs = new NativeArray<Vector2>(sentGameObjectMesh.uv, Allocator.TempJob);
-
-            for (int i = 0; i < submeshCount; i++)
-            {
-                int[] hitGameObjectSubMeshTriangles = sentGameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
-                NativeArray<int> trianglesInMesh = new NativeArray<int>(hitGameObjectSubMeshTriangles, Allocator.TempJob); // Convert the triangles to a native array
-                NativeArray<Vector3> triPoints = new NativeArray<Vector3>(trianglesInMesh.Length, Allocator.Persistent);
-                NativeArray<Vector3> triNorms = new NativeArray<Vector3>(trianglesInMesh.Length, Allocator.Persistent);
-                NativeArray<Vector2> triUVs = new NativeArray<Vector2>(trianglesInMesh.Length, Allocator.Persistent);
-
-                SeparateMeshJob separateMeshJob = new SeparateMeshJob()
-                {
-                    vertices = verts,
-                    normals = norms,
-                    uv = uvs,
-                    triangles = trianglesInMesh,
-                    triPoints = triPoints,
-                    triNorms = triNorms,
-                    triUVs = triUVs,
-                };
-
-                // separateMeshJob.Run(trianglesInMesh.Length / 3);
-
-                Debug.Log("Job 1: " + i);
-
-                
-                JobHandle scheduleDependency = separateMeshJob.Schedule(trianglesInMesh.Length / 3, dependency);
-                JobHandle scheduleParallelDependency = separateMeshJob.ScheduleParallel(trianglesInMesh.Length / 3, 1, scheduleDependency);
-
-                scheduleParallelDependency.Complete();
-
-                trianglesInMesh.Dispose();
-
-                for (int j = 0; j < trianglesInMesh.Length; j++)
-                {
-                    _vertices[j] = triPoints[j];
-                    _normals[j] = triNorms[j];
-                    _uvs[j] = triUVs[j];
-                }
-
-                triPoints.Dispose();
-                triNorms.Dispose();
-                triUVs.Dispose();
-            }
-
-            verts.Dispose();
-            norms.Dispose();
-            uvs.Dispose();
-
-            if (dependency.IsCompleted)
-            {
-                Debug.Log("Job One Complete"); //! =====
-                SeparateMeshes(mesh1, mesh2);
-                BeginFill();
-                CreateFirstMesh(_sentGameObject);
-            }
-        }
-
-        // Vector3[] triangleVertices = new Vector3[3];
-        // Vector3[] triangleNormals = new Vector3[3];
-        // Vector2[] triangleUVs = new Vector2[3];
-
-        // private void CalcJobOne(GameObject _sentGameObject)
-        // {
-        //     int submeshCount = sentGameObjectMesh.subMeshCount;
-        //     bool complete = false;
-
-
-        //     NativeArray<Vector3> verts = new NativeArray<Vector3>(sentGameObjectMesh.vertices, Allocator.TempJob);
-        //     NativeArray<Vector3> norms = new NativeArray<Vector3>(sentGameObjectMesh.normals, Allocator.TempJob);
-        //     NativeArray<Vector2> uvs = new NativeArray<Vector2>(sentGameObjectMesh.uv, Allocator.TempJob);
-
-        //     NativeMultiHashMap<int, Vector3> vertsToAddMap = new NativeMultiHashMap<int, Vector3>(3, Allocator.Persistent);
-        //     NativeMultiHashMap<int, Vector3> normsToAddMap = new NativeMultiHashMap<int, Vector3>(3, Allocator.Persistent);
-        //     NativeMultiHashMap<int, Vector2> uvsToAddMap = new NativeMultiHashMap<int, Vector2>(3, Allocator.Persistent);
-
-        //     for (int i = 0; i < submeshCount; i++)
-        //     {
-        //         int[] hitGameObjectSubMeshTriangles = sentGameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
-        //         NativeArray<int> hitGameObjectSubMeshTrianglesNative = new NativeArray<int>(hitGameObjectSubMeshTriangles, Allocator.TempJob); // Convert the triangles to a native array
-
-        //         SeparateMeshJob separateMeshJob = new SeparateMeshJob()
-        //         {
-        //             triangles = hitGameObjectSubMeshTrianglesNative,
-        //             vertices = verts,
-        //             normals = norms,
-        //             uv = uvs,
-        //             vertsToAddMap = vertsToAddMap,
-        //             normsToAddMap = normsToAddMap,
-        //             uvsToAddMap = uvsToAddMap
-        //         };
-
-        //         separateMeshJob.Run(hitGameObjectSubMeshTrianglesNative.Length / 3);
-
-        //         // JobHandle dependency = new JobHandle();
-        //         // JobHandle scheduleDependency = separateMeshJob.Schedule(hitGameObjectSubMeshTrianglesNative.Length / 3, dependency);
-        //         // JobHandle scheduleParallelDependency = separateMeshJob.ScheduleParallel(hitGameObjectSubMeshTrianglesNative.Length / 3, 1, scheduleDependency);
-
-        //         // scheduleParallelDependency.Complete();
-
-        //         for (int j = 0; j < hitGameObjectSubMeshTriangles.Length; j += 3)
-        //         {
-        //             int index = 0;
-
-        //             foreach (Vector3 vertex in vertsToAddMap.GetValuesForKey(j))
-        //             {
-        //                 if (index < 3)
-        //                 {
-        //                     triangleVertices[index] = vertex;
-        //                     index++;
-        //                 }
-        //             }
-        //             index = 0;
-
-        //             foreach (Vector3 normal in normsToAddMap.GetValuesForKey(j))
-        //             {
-        //                 if (index < 3)
-        //                 {
-        //                     triangleNormals[index] = normal;
-        //                     index++;
-        //                 }
-        //             }
-        //             index = 0;
-
-        //             foreach (Vector2 uv in uvsToAddMap.GetValuesForKey(j))
-        //             {
-        //                 if (index < 3)
-        //                 {
-        //                     triangleUVs[index] = uv;
-        //                     index++;
-        //                 }
-        //             }
-        //             index = 0;
-
-        //             SeparateMeshes(mesh1, mesh2, hitGameObjectSubMeshTriangles, i, j); // Separate the meshes
-        //             complete = true;
-        //         }
-
-        //         hitGameObjectSubMeshTrianglesNative.Dispose();
-        //     }
-
-        //     verts.Dispose();
-        //     norms.Dispose();
-        //     uvs.Dispose();
-        //     vertsToAddMap.Dispose();
-        //     normsToAddMap.Dispose();
-        //     uvsToAddMap.Dispose();
-
-        //     if (complete)
-        //     {
-        //         Debug.Log("Job One Complete"); //! =====
-        //         BeginFill();
-        //         CreateFirstMesh(_sentGameObject);
-        //     }
-        // }
 
         /// <summary>
         /// Iterates through the triangles of all the submeshes of the original mesh and splits them into two meshes
@@ -246,25 +77,7 @@ namespace Connoreaster
                     int triangleIndexC = hitGameObjectSubMeshTriangles[j + 2]; // Get the third index of the triangle
 
                     // Get the vertices of the triangle
-                    // triangle = GetTriangle(triangleIndexA, triangleIndexB, triangleIndexC, i);
-                    // triangle = new MeshTriangleData(triangleVertices, triangleNormals, triangleUVs, i);
-                    Vector3[] verts = new Vector3[3];
-                    Vector3[] norms = new Vector3[3];
-                    Vector2[] uvs = new Vector2[3];
-
-                    verts[0] = _vertices[j];
-                    verts[1] = _vertices[j + 1];
-                    verts[2] = _vertices[j + 2];
-
-                    norms[0] = _normals[j];
-                    norms[1] = _normals[j + 1];
-                    norms[2] = _normals[j + 2];
-
-                    uvs[0] = _uvs[j];
-                    uvs[1] = _uvs[j + 1];
-                    uvs[2] = _uvs[j + 2];
-
-                    triangle = new MeshTriangleData(verts, norms, _uvs, i);
+                    triangle = GetTriangle(triangleIndexA, triangleIndexB, triangleIndexC, i);
 
                     // Check what side the submesh triangle is on the slicePlane and if it has been sliced through
                     bool triangleALeftSide = slicePlane.GetSide(sentGameObjectMesh.vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
@@ -292,21 +105,6 @@ namespace Connoreaster
                 }
             }
         }
-
-        // struct TriJob : IJobFor
-        // {
-        //     [ReadOnly] public NativeArray<int> hitGameObjectSubMeshTriangles;
-        //     [ReadOnly] public NativeArray<Vector3> vertices;
-        //     [ReadOnly] public NativeArray<Vector3> normals;
-        //     [ReadOnly] public NativeArray<Vector2> uv;
-
-        //     public void Execute(int index)
-        //     {
-        //         int triangleIndexA = hitGameObjectSubMeshTriangles[index]; // Get the first index of the triangle
-        //         int triangleIndexB = hitGameObjectSubMeshTriangles[index + 1]; // Get the second index of the triangle
-        //         int triangleIndexC = hitGameObjectSubMeshTriangles[index + 2]; // Get the third index of the triangle
-        //     }
-        // }
 
         private MeshTriangleData GetTriangle(int _triangleIndexA, int _triangleIndexB, int _triangleIndexC, int _submeshIndex)
         {
