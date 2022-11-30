@@ -643,7 +643,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &290720632
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2427,7 +2427,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &1650948730
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -3406,7 +3406,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &1070947262516897739
 GameObject:
   m_ObjectHideFlags: 0
@@ -4367,6 +4367,10 @@ PrefabInstance:
     - target: {fileID: 4141614263997146006, guid: 09d7a670921801d49ba90fabf4632c9f, type: 3}
       propertyPath: m_Name
       value: MaleDummyRagdoll
+      objectReference: {fileID: 0}
+    - target: {fileID: 4141614263997146006, guid: 09d7a670921801d49ba90fabf4632c9f, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4934545175746017614, guid: 09d7a670921801d49ba90fabf4632c9f, type: 3}
       propertyPath: m_TagString

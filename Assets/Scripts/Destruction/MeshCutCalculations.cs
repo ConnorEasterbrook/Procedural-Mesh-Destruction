@@ -24,6 +24,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Linq;
 using UnityEngine;
 using Unity.Collections;
 using Unity.Jobs;
@@ -76,8 +77,24 @@ namespace Connoreaster
                     int triangleIndexB = hitGameObjectSubMeshTriangles[j + 1]; // Get the second index of the triangle
                     int triangleIndexC = hitGameObjectSubMeshTriangles[j + 2]; // Get the third index of the triangle
 
-                    // Get the vertices of the triangle
-                    triangle = GetTriangle(triangleIndexA, triangleIndexB, triangleIndexC, i);
+                    // // Get the vertices of the triangle
+                    // triangle = GetTriangle(triangleIndexA, triangleIndexB, triangleIndexC, i);
+
+                    var vertsToAdd = new Vector3[3]; // Create a new array of vertices to add to the new mesh
+                    var normsToAdd = new Vector3[3]; // Create a new array of normals to add to the new mesh
+                    var uvsToAdd = new Vector2[3]; // Create a new array of UVs to add to the new mesh
+
+                    // Initialize the job data
+                    var job = new TriangleJob(sentGameObjectMesh, triangleIndexA, triangleIndexB, triangleIndexC);
+                    JobHandle jobHandle = job.Schedule(); // Schedule the job
+                    jobHandle.Complete(); // Complete the job
+
+                    vertsToAdd = job.vertices.ToArray(); // Get the vertices of the triangle
+                    normsToAdd = job.normals.ToArray(); // Get the normals of the triangle
+                    uvsToAdd = job.uvs.ToArray(); // Get the UVs of the triangle
+                    triangle = new MeshTriangleData(vertsToAdd, normsToAdd, uvsToAdd, i); // Create a new triangle with the job data
+
+                    job.Dispose(); // Dispose of the job
 
                     // Check what side the submesh triangle is on the slicePlane and if it has been sliced through
                     bool triangleALeftSide = slicePlane.GetSide(sentGameObjectMesh.vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
