@@ -72,7 +72,6 @@ namespace Connoreaster
                 // Iterate through the submesh indices as triangles to determine which mesh to assign them to
                 for (int j = 0; j < hitGameObjectSubMeshTriangles.Length; j += 3)
                 {
-
                     int triangleIndexA = hitGameObjectSubMeshTriangles[j]; // Get the first index of the triangle
                     int triangleIndexB = hitGameObjectSubMeshTriangles[j + 1]; // Get the second index of the triangle
                     int triangleIndexC = hitGameObjectSubMeshTriangles[j + 2]; // Get the third index of the triangle
@@ -94,12 +93,12 @@ namespace Connoreaster
                     uvsToAdd = job.uvs.ToArray(); // Get the UVs of the triangle
                     triangle = new MeshTriangleData(vertsToAdd, normsToAdd, uvsToAdd, i); // Create a new triangle with the job data
 
-                    job.Dispose(); // Dispose of the job
-
                     // Check what side the submesh triangle is on the slicePlane and if it has been sliced through
-                    bool triangleALeftSide = slicePlane.GetSide(sentGameObjectMesh.vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
-                    bool triangleBLeftSide = slicePlane.GetSide(sentGameObjectMesh.vertices[triangleIndexB]); // Check if the second vertex of the triangle is on the left side of the plane
-                    bool triangleCLeftSide = slicePlane.GetSide(sentGameObjectMesh.vertices[triangleIndexC]); // Check if the third vertex of the triangle is on the left side of the plane
+                    bool triangleALeftSide = slicePlane.GetSide(job._vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
+                    bool triangleBLeftSide = slicePlane.GetSide(job._vertices[triangleIndexB]); // Check if the second vertex of the triangle is on the left side of the plane
+                    bool triangleCLeftSide = slicePlane.GetSide(job._vertices[triangleIndexC]); // Check if the third vertex of the triangle is on the left side of the plane
+
+                    job.Dispose(); // Dispose of the job
 
                     switch (triangleALeftSide)
                     {
@@ -123,34 +122,34 @@ namespace Connoreaster
             }
         }
 
-        private MeshTriangleData GetTriangle(int _triangleIndexA, int _triangleIndexB, int _triangleIndexC, int _submeshIndex)
-        {
-            //Adding the Vertices at the triangleIndex
-            Vector3[] verticesToAdd =
-            {
-                sentGameObjectMesh.vertices[_triangleIndexA],
-                sentGameObjectMesh.vertices[_triangleIndexB],
-                sentGameObjectMesh.vertices[_triangleIndexC]
-            };
+        // private MeshTriangleData GetTriangle(int _triangleIndexA, int _triangleIndexB, int _triangleIndexC, int _submeshIndex)
+        // {
+        //     //Adding the Vertices at the triangleIndex
+        //     Vector3[] verticesToAdd =
+        //     {
+        //         sentGameObjectMesh.vertices[_triangleIndexA],
+        //         sentGameObjectMesh.vertices[_triangleIndexB],
+        //         sentGameObjectMesh.vertices[_triangleIndexC]
+        //     };
 
-            //Adding the normals at the triangle index
-            Vector3[] normalsToAdd =
-            {
-                sentGameObjectMesh.normals[_triangleIndexA],
-                sentGameObjectMesh.normals[_triangleIndexB],
-                sentGameObjectMesh.normals[_triangleIndexC]
-            };
+        //     //Adding the normals at the triangle index
+        //     Vector3[] normalsToAdd =
+        //     {
+        //         sentGameObjectMesh.normals[_triangleIndexA],
+        //         sentGameObjectMesh.normals[_triangleIndexB],
+        //         sentGameObjectMesh.normals[_triangleIndexC]
+        //     };
 
-            //adding the uvs at the triangleIndex
-            Vector2[] uvsToAdd =
-            {
-                sentGameObjectMesh.uv[_triangleIndexA],
-                sentGameObjectMesh.uv[_triangleIndexB],
-                sentGameObjectMesh.uv[_triangleIndexC]
-            };
+        //     //adding the uvs at the triangleIndex
+        //     Vector2[] uvsToAdd =
+        //     {
+        //         sentGameObjectMesh.uv[_triangleIndexA],
+        //         sentGameObjectMesh.uv[_triangleIndexB],
+        //         sentGameObjectMesh.uv[_triangleIndexC]
+        //     };
 
-            return new MeshTriangleData(verticesToAdd, normalsToAdd, uvsToAdd, _submeshIndex);
-        }
+        //     return new MeshTriangleData(verticesToAdd, normalsToAdd, uvsToAdd, _submeshIndex);
+        // }
 
         /// <summary>
         /// Adds additional vertices to cut triangles to make them whole again

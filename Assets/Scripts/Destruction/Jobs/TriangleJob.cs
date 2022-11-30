@@ -35,7 +35,7 @@ namespace Connoreaster
         private int triangleIndexA;
         private int triangleIndexB;
         private int triangleIndexC;
-        private NativeArray<Vector3> _vertices;
+        public NativeArray<Vector3> _vertices;
         private NativeArray<Vector3> _normals;
         private NativeArray<Vector2> _uvs;
         public NativeArray<Vector3> vertices;
