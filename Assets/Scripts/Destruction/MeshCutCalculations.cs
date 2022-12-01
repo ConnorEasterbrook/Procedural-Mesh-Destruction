@@ -53,113 +53,128 @@ namespace Connoreaster
             explodeForce = _explodeForce;
             debugColour = _debugColour;
 
-            SeparateMeshes(mesh1, mesh2);
+            SeparateMeshes();
             BeginFill();
             CreateFirstMesh(_sentGameObject);
         }
+
+        private Vector3[][] vertsToAdd;
+        private Vector3[][] normsToAdd;
+        private Vector2[][] uvsToAdd;
+        private bool[][] triangleLeftSide;
 
         /// <summary>
         /// Iterates through the triangles of all the submeshes of the original mesh and splits them into two meshes
         /// </summary>
         // private void SeparateMeshes(GeneratedMeshData mesh1, GeneratedMeshData mesh2, int[] hitGameObjectSubMeshTriangles, int i, int j)
-        private void SeparateMeshes(GeneratedMeshData mesh1, GeneratedMeshData mesh2)
+        private void SeparateMeshes()
         {
+            // int triangleIndexA = 0;
+            // int triangleIndexB = 0;
+            // int triangleIndexC = 0;
+            int iterator = 0;
+
+            int batchCount = 1;
+
+            if (sentGameObjectMesh.triangles.Length < 100)
+            {
+                batchCount = 128;
+            }
+            else if (sentGameObjectMesh.triangles.Length < 1000)
+            {
+                batchCount = 64;
+            }
+            else if (sentGameObjectMesh.triangles.Length < 10000)
+            {
+                batchCount = 32;
+            }
+            else if (sentGameObjectMesh.triangles.Length < 100000)
+            {
+                batchCount = 1;
+            }
+            
+
             // Iterate through all the submeshes
             for (int i = 0; i < sentGameObjectMesh.subMeshCount; i++)
             {
                 int[] hitGameObjectSubMeshTriangles = sentGameObjectMesh.GetTriangles(i); // Get the triangles of the submesh
 
+                int subMeshTriangleCount = hitGameObjectSubMeshTriangles.Length / 3; // Get the number of triangles in the submesh
+
+                vertsToAdd = new Vector3[subMeshTriangleCount][];
+                normsToAdd = new Vector3[subMeshTriangleCount][];
+                uvsToAdd = new Vector2[subMeshTriangleCount][];
+                triangleLeftSide = new bool[subMeshTriangleCount][];
+
+                SeparateMeshJob job = new SeparateMeshJob(i, sentGameObjectMesh, hitGameObjectSubMeshTriangles, slicePlane);
+                // job.Run(subMeshTriangleCount);
+
+                JobHandle dependency = new JobHandle();
+                JobHandle scheduleDependency = job.Schedule(subMeshTriangleCount, dependency);
+                
+                JobHandle scheduleParallelJobHandle = job.ScheduleParallel(subMeshTriangleCount, batchCount, scheduleDependency);
+                scheduleParallelJobHandle.Complete();
+
                 // Iterate through the submesh indices as triangles to determine which mesh to assign them to
                 for (int j = 0; j < hitGameObjectSubMeshTriangles.Length; j += 3)
                 {
-                    int triangleIndexA = hitGameObjectSubMeshTriangles[j]; // Get the first index of the triangle
-                    int triangleIndexB = hitGameObjectSubMeshTriangles[j + 1]; // Get the second index of the triangle
-                    int triangleIndexC = hitGameObjectSubMeshTriangles[j + 2]; // Get the third index of the triangle
+                    iterator = j / 3;
 
-                    // // Get the vertices of the triangle
-                    // triangle = GetTriangle(triangleIndexA, triangleIndexB, triangleIndexC, i);
+                    vertsToAdd[iterator] = new Vector3[3];
+                    normsToAdd[iterator] = new Vector3[3];
+                    uvsToAdd[iterator] = new Vector2[3];
+                    triangleLeftSide[iterator] = new bool[3];
 
-                    var vertsToAdd = new Vector3[3]; // Create a new array of vertices to add to the new mesh
-                    var normsToAdd = new Vector3[3]; // Create a new array of normals to add to the new mesh
-                    var uvsToAdd = new Vector2[3]; // Create a new array of UVs to add to the new mesh
+                    vertsToAdd[iterator][0] = job.triVerts[j];
+                    vertsToAdd[iterator][1] = job.triVerts[j + 1];
+                    vertsToAdd[iterator][2] = job.triVerts[j + 2];
 
-                    // Initialize the job data
-                    var job = new TriangleJob(sentGameObjectMesh, triangleIndexA, triangleIndexB, triangleIndexC);
-                    JobHandle jobHandle = job.Schedule(); // Schedule the job
-                    jobHandle.Complete(); // Complete the job
+                    normsToAdd[iterator][0] = job.triNorms[j];
+                    normsToAdd[iterator][1] = job.triNorms[j + 1];
+                    normsToAdd[iterator][2] = job.triNorms[j + 2];
 
-                    vertsToAdd = job.vertices.ToArray(); // Get the vertices of the triangle
-                    normsToAdd = job.normals.ToArray(); // Get the normals of the triangle
-                    uvsToAdd = job.uvs.ToArray(); // Get the UVs of the triangle
-                    triangle = new MeshTriangleData(vertsToAdd, normsToAdd, uvsToAdd, i); // Create a new triangle with the job data
+                    uvsToAdd[iterator][0] = job.triUVs[j];
+                    uvsToAdd[iterator][1] = job.triUVs[j + 1];
+                    uvsToAdd[iterator][2] = job.triUVs[j + 2];
 
-                    // Check what side the submesh triangle is on the slicePlane and if it has been sliced through
-                    bool triangleALeftSide = slicePlane.GetSide(job._vertices[triangleIndexA]); // Check if the first vertex of the triangle is on the left side of the plane
-                    bool triangleBLeftSide = slicePlane.GetSide(job._vertices[triangleIndexB]); // Check if the second vertex of the triangle is on the left side of the plane
-                    bool triangleCLeftSide = slicePlane.GetSide(job._vertices[triangleIndexC]); // Check if the third vertex of the triangle is on the left side of the plane
+                    triangleLeftSide[iterator][0] = job.triangleLeftSide[j];
+                    triangleLeftSide[iterator][1] = job.triangleLeftSide[j + 1];
+                    triangleLeftSide[iterator][2] = job.triangleLeftSide[j + 2];
 
-                    job.Dispose(); // Dispose of the job
+                    triangle = new MeshTriangleData(vertsToAdd[iterator], normsToAdd[iterator], uvsToAdd[iterator], i); // Create a new triangle with the job data
 
-                    switch (triangleALeftSide)
+                    switch (triangleLeftSide[iterator][0])
                     {
                         // All three vertices are on one side of the plane
-                        case true when triangleBLeftSide && triangleCLeftSide:
+                        case true when triangleLeftSide[iterator][1] && triangleLeftSide[iterator][2]:
                             mesh1.AddTriangle(triangle);
                             break;
 
                         // All three vertices are on the other side of the plane.
-                        case false when !triangleBLeftSide && !triangleCLeftSide:
+                        case false when !triangleLeftSide[iterator][1] && !triangleLeftSide[iterator][2]:
                             mesh2.AddTriangle(triangle);
                             break;
 
                         // A triangle was cut through so now we need to calculate new triangles   
                         default:
-                            CutTriangle(triangleALeftSide, triangleBLeftSide, triangleCLeftSide);
+                            CutTriangle(iterator);
                             break;
                     }
-
                 }
+
+                job.Dispose();
             }
         }
-
-        // private MeshTriangleData GetTriangle(int _triangleIndexA, int _triangleIndexB, int _triangleIndexC, int _submeshIndex)
-        // {
-        //     //Adding the Vertices at the triangleIndex
-        //     Vector3[] verticesToAdd =
-        //     {
-        //         sentGameObjectMesh.vertices[_triangleIndexA],
-        //         sentGameObjectMesh.vertices[_triangleIndexB],
-        //         sentGameObjectMesh.vertices[_triangleIndexC]
-        //     };
-
-        //     //Adding the normals at the triangle index
-        //     Vector3[] normalsToAdd =
-        //     {
-        //         sentGameObjectMesh.normals[_triangleIndexA],
-        //         sentGameObjectMesh.normals[_triangleIndexB],
-        //         sentGameObjectMesh.normals[_triangleIndexC]
-        //     };
-
-        //     //adding the uvs at the triangleIndex
-        //     Vector2[] uvsToAdd =
-        //     {
-        //         sentGameObjectMesh.uv[_triangleIndexA],
-        //         sentGameObjectMesh.uv[_triangleIndexB],
-        //         sentGameObjectMesh.uv[_triangleIndexC]
-        //     };
-
-        //     return new MeshTriangleData(verticesToAdd, normalsToAdd, uvsToAdd, _submeshIndex);
-        // }
 
         /// <summary>
         /// Adds additional vertices to cut triangles to make them whole again
         /// </summary>
-        private void CutTriangle(bool triangleALeftSide, bool triangleBLeftSide, bool triangleCLeftSide)
+        private void CutTriangle(int iterator)
         {
             List<bool> belongsToMesh1 = new List<bool>(); // Stores whether the vertices belong to mesh1 (true) or mesh2 (false)
-            belongsToMesh1.Add(triangleALeftSide); // Add the first vertex to the list
-            belongsToMesh1.Add(triangleBLeftSide); // Add the second vertex to the list
-            belongsToMesh1.Add(triangleCLeftSide); // Add the third vertex to the list
+            belongsToMesh1.Add(triangleLeftSide[iterator][0]); // Add the first vertex to the list
+            belongsToMesh1.Add(triangleLeftSide[iterator][1]); // Add the second vertex to the list
+            belongsToMesh1.Add(triangleLeftSide[iterator][2]); // Add the third vertex to the list
 
             MeshTriangleData mesh1Triangle = new MeshTriangleData(new Vector3[2], new Vector3[2], new Vector2[2], triangle.subMeshIndex); // Stores the vertices of the first triangle
             MeshTriangleData mesh2Triangle = new MeshTriangleData(new Vector3[2], new Vector3[2], new Vector2[2], triangle.subMeshIndex); // Stores the vertices of the second triangle
