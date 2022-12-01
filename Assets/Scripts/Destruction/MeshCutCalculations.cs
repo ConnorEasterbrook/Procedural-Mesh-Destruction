@@ -518,10 +518,10 @@ namespace Connoreaster
             secondMeshGO.transform.localScale = hitGameObject.transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
             secondMeshGO.AddComponent<MeshRenderer>(); // Add a mesh renderer to the second mesh
 
-            if (hitGameObject.GetComponent<MeshShatter>() != null)
-            {
-                secondMeshGO.AddComponent<MeshShatter>().debugColour = debugColour; // Add a mesh shatter script to the second mesh if the original mesh has one
-            }
+            // if (hitGameObject.GetComponent<MeshShatter>() != null)
+            // {
+            //     secondMeshGO.AddComponent<MeshShatter>().debugColour = debugColour; // Add a mesh shatter script to the second mesh if the original mesh has one
+            // }
 
             if (hitGameObject.GetComponent<MeshSizeLimit>() == null)
             {
