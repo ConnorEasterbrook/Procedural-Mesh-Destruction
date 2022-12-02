@@ -28,6 +28,6 @@ namespace Connoreaster
 {
     public class DebugController : MonoBehaviour
     {
-        public bool debugColourSlice { get; set; } = false;
+        public bool debugColourSlice = false;
     }
 }

@@ -46,6 +46,7 @@ namespace Connoreaster
         private float cameraTiltSmooth; // For smoothing the tilt movement
         private float cameraTiltSmoothVelocity; // Tilt smoothing speed
         private Quaternion panRotation;
+        private Vector3 oldCameraPos;
 
         [Header("Player Movement")]
         [Tooltip("Walking speed. 5.0f feels good for shooter-like movement.")]
@@ -53,11 +54,18 @@ namespace Connoreaster
         [Tooltip("Smooths player movement. Lower values = sharper stops. 0.1f feels cinematic.")]
         [Range(0.0f, 0.4f)]
         public float movementSmoothTime = 0.1f;
+        [Tooltip("Jump height. 7.5f feels good for arcade-like jumping (10.0f gravity). 10.0 for realistic jumping (20.0f gravity)")]
+        public float jumpForce = 10.0f;
         [Tooltip("Amount of gravity. 10.0f feels good for arcade-like gravity. 20.0f for realistic gravity.")]
         public float gravityForce = 20.0f;
         private float fallingVelocity = 0.0f; // Keep track of falling speed
         private Vector3 velocity;
         private Vector3 currentVelocity;
+
+        // COLLISION
+        private Collider playerCollider;
+        private float yCollisionBounds = 0.0f; // Variable used in raycast to check if grounded
+        private float lastGroundedTime = 0.0f; // Keep track of when last grounded
 
         [Header("Misc")]
         public bool lockCursor = false;
@@ -74,6 +82,9 @@ namespace Connoreaster
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
+
+            playerCollider = GetComponent<Collider>();
+            yCollisionBounds = playerCollider.bounds.extents.y;
         }
 
         void FixedUpdate()
@@ -81,10 +92,14 @@ namespace Connoreaster
             CalculateCameraMovement();
             transform.rotation = panRotation;
             playerCamera.transform.localEulerAngles = Vector3.right * cameraTiltSmooth;
+            // playerCamera.transform.localPosition = Vector3.Lerp(playerCamera.transform.localPosition, oldCameraPos, 0.1f);
 
+            FixedGravity();
             CalculatePlayerMovement();
             Vector3 localMove = transform.TransformDirection(velocity); // Final calculation
-            playerRigidbody.AddForce(localMove - playerRigidbody.velocity, ForceMode.VelocityChange);
+            playerRigidbody.MovePosition(playerRigidbody.position + localMove * Time.fixedDeltaTime);
+
+            playerChild.transform.localRotation = Quaternion.Euler(0, 0, -velocity.x * 2);
         }
 
         private void CalculateCameraMovement()
@@ -134,11 +149,13 @@ namespace Connoreaster
 
             // Normalize the Vector2 input variable and make it a Vector3. Then transform the input to move in world space.
             Vector3 inputDirection = new Vector3(input.x, 0, input.y).normalized;
-            Vector3 inputDirectionWorld = transform.TransformDirection(inputDirection);
-            Debug.Log(inputDirectionWorld);
+
+            // Get and convert the direction of childObject for correct movement direction
+            float facingDirection = playerChild.transform.localEulerAngles.y;
+            Quaternion facingDirectionEuler = Quaternion.Euler(0.0f, facingDirection, 0.0f);
 
             // Create a new Vector3 that takes in our world movement and current speed to then use in a movement smoothing calculation
-            Vector3 targetVelocity = inputDirectionWorld * walkSpeed;
+            Vector3 targetVelocity = facingDirectionEuler * inputDirection * walkSpeed;
             velocity = Vector3.SmoothDamp(velocity, targetVelocity, ref currentVelocity, movementSmoothTime); // ref currentVelocity because function needs to set a currentVelocity
 
             // Establish falling speed. Increase as the falling duration grows
@@ -146,6 +163,30 @@ namespace Connoreaster
 
             // Set velocity to match the recorded movement from previous movement sections
             velocity = new Vector3(velocity.x, fallingVelocity, velocity.z);
+        }
+
+        private void FixedGravity()
+        {
+            playerRigidbody.AddForce(-transform.up * playerRigidbody.mass * gravityForce);
+
+            // Establish falling speed. Increase as the falling duration grows
+            fallingVelocity -= gravityForce * Time.deltaTime;
+
+            // Check for jump input and if true, check that the character isn't jumping or falling. Then jump
+            if (Input.GetKey(KeyCode.Space) && CheckGrounded())
+            {
+                fallingVelocity = jumpForce;
+            }
+            else if (CheckGrounded()) // If there is collision below the player (ground)
+            {
+                lastGroundedTime = Time.time; // Set lastGroundedTime to the current time
+                fallingVelocity = 0; // Stop fallingVelocity
+            }
+        }
+
+        private bool CheckGrounded()
+        {
+            return Physics.Raycast(transform.position, -transform.up, yCollisionBounds);
         }
     }
 }
