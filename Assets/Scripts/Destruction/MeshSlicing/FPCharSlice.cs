@@ -30,13 +30,14 @@ namespace Connoreaster
     {
         private Plane slicePlane;
         public float explodeForce = 250f;
-        public bool debugColour = false;
 
         public GameObject tip;
         public GameObject baseOfWeapon;
         private Vector3 enterPos;
         private Vector3 baseEnterPos;
         private Vector3 exitPos;
+
+        public DebugController debugController;
 
         private void Update()
         {
@@ -105,7 +106,7 @@ namespace Connoreaster
             }
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
+            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
         }
     }
 }
