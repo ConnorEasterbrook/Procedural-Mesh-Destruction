@@ -35,14 +35,15 @@ namespace Connoreaster
         private int triangleIndexA;
         private int triangleIndexB;
         private int triangleIndexC;
-        private NativeArray<Vector3> _vertices;
+        public NativeArray<Vector3> _vertices;
         private NativeArray<Vector3> _normals;
         private NativeArray<Vector2> _uvs;
         public NativeArray<Vector3> vertices;
         public NativeArray<Vector3> normals;
         public NativeArray<Vector2> uvs;
+        public NativeArray<bool> triangleLeftSide;
 
-        public TriangleJob(Mesh mesh, int A, int B, int C)
+        public TriangleJob(Mesh mesh, Plane plane, int A, int B, int C)
         {
             triangleIndexA = A;
             triangleIndexB = B;
@@ -55,6 +56,11 @@ namespace Connoreaster
             vertices = new NativeArray<Vector3>(3, Allocator.TempJob);
             normals = new NativeArray<Vector3>(3, Allocator.TempJob);
             uvs = new NativeArray<Vector2>(3, Allocator.TempJob);
+
+            triangleLeftSide = new NativeArray<bool>(3, Allocator.TempJob);
+            triangleLeftSide[0] = plane.GetSide(_vertices[triangleIndexA]);
+            triangleLeftSide[1] = plane.GetSide(_vertices[triangleIndexB]);
+            triangleLeftSide[2] = plane.GetSide(_vertices[triangleIndexC]);
         }
 
         public void Execute()
@@ -81,6 +87,8 @@ namespace Connoreaster
             vertices.Dispose();
             normals.Dispose();
             uvs.Dispose();
+
+            triangleLeftSide.Dispose();
         }
     }
 }

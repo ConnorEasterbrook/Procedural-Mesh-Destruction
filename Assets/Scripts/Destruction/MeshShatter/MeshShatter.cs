@@ -59,13 +59,13 @@ namespace Connoreaster
 
         void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.tag == "Projectile")
+            if (collision.gameObject.tag == "Sliceable")
             {
                 if (!isShattered)
                 {
                     for (int i = 0; i < shatterIterations; i++)
                     {
-                        Cut();
+                        Cut(collision.gameObject);
                     }
 
                     Destroy(gameObject);
@@ -78,9 +78,9 @@ namespace Connoreaster
         /// <summary>
         /// Cut the mesh using a plane
         /// </summary>
-        public void Cut()
+        public void Cut(GameObject hitObject)
         {
-            gameObjectMesh = GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
+            gameObjectMesh = hitObject.GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
 
             // Create a plane at a random point on the mesh
             slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3
@@ -91,7 +91,7 @@ namespace Connoreaster
             ));
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(gameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
+            calc.CallScript(hitObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
         }
     }
 }
