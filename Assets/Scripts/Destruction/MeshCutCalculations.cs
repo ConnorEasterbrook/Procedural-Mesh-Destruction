@@ -62,6 +62,7 @@ namespace Connoreaster
         private Vector3[][] normsToAdd;
         private Vector2[][] uvsToAdd;
         private bool[][] triangleLeftSide;
+        int batchCount = 1;
 
         /// <summary>
         /// Iterates through the triangles of all the submeshes of the original mesh and splits them into two meshes
@@ -69,30 +70,25 @@ namespace Connoreaster
         // private void SeparateMeshes(GeneratedMeshData mesh1, GeneratedMeshData mesh2, int[] hitGameObjectSubMeshTriangles, int i, int j)
         private void SeparateMeshes()
         {
-            // int triangleIndexA = 0;
-            // int triangleIndexB = 0;
-            // int triangleIndexC = 0;
             int iterator = 0;
 
-            int batchCount = 1;
-
-            if (sentGameObjectMesh.triangles.Length < 100)
+            if (sentGameObjectMesh.triangles.Length < 50)
             {
                 batchCount = 128;
             }
-            else if (sentGameObjectMesh.triangles.Length < 1000)
+            else if (sentGameObjectMesh.triangles.Length < 500)
             {
                 batchCount = 64;
             }
-            else if (sentGameObjectMesh.triangles.Length < 10000)
+            else if (sentGameObjectMesh.triangles.Length < 2000)
             {
                 batchCount = 32;
             }
-            else if (sentGameObjectMesh.triangles.Length < 100000)
+            else if (sentGameObjectMesh.triangles.Length < 10000)
             {
                 batchCount = 1;
             }
-            
+
 
             // Iterate through all the submeshes
             for (int i = 0; i < sentGameObjectMesh.subMeshCount; i++)
@@ -107,11 +103,8 @@ namespace Connoreaster
                 triangleLeftSide = new bool[subMeshTriangleCount][];
 
                 SeparateMeshJob job = new SeparateMeshJob(i, sentGameObjectMesh, hitGameObjectSubMeshTriangles, slicePlane);
-                // job.Run(subMeshTriangleCount);
-
                 JobHandle dependency = new JobHandle();
                 JobHandle scheduleDependency = job.Schedule(subMeshTriangleCount, dependency);
-                
                 JobHandle scheduleParallelJobHandle = job.ScheduleParallel(subMeshTriangleCount, batchCount, scheduleDependency);
                 scheduleParallelJobHandle.Complete();
 
@@ -326,8 +319,9 @@ namespace Connoreaster
         /// </summary>
         public void BeginFill()
         {
+
             List<Vector3> vertices = new List<Vector3>(); // Create a list of vertices
-            List<Vector3> polygon = new List<Vector3>(); // Create a list of vertices for the polygon
+            List<Vector3> polygonVertices = new List<Vector3>(); // Create a list of vertices for the polygon
 
             // Loop through all the vertices in the mesh
             for (int i = 0; i < newVertices.Count; i++)
@@ -335,15 +329,15 @@ namespace Connoreaster
                 // If the vertex is not in the list of vertices
                 if (!vertices.Contains(newVertices[i]))
                 {
-                    polygon.Clear(); // Clear the polygon list
-                    polygon.Add(newVertices[i]); // Add the vertex to the polygon list
-                    polygon.Add(newVertices[i + 1]); // Add the next vertex to the polygon list
+                    polygonVertices.Clear(); // Clear the polygon list
+                    polygonVertices.Add(newVertices[i]); // Add the vertex to the polygon list
+                    polygonVertices.Add(newVertices[i + 1]); // Add the next vertex to the polygon list
 
-                    vertices.Add(newVertices[i]); // Add the vertex to the list of vertices
-                    vertices.Add(newVertices[i + 1]); // Add the next vertex to the list of vertices
+                    vertices.Add(newVertices[i]); // Add the vertex to the list of vertices. This is used to prevent duplicate vertices
+                    vertices.Add(newVertices[i + 1]);
 
-                    EvaluatePairs(vertices, polygon); // Evaluate the pairs of vertices
-                    Fill(polygon); // Fill the polygon
+                    EvaluatePairs(vertices, polygonVertices); // Evaluate the pairs of vertices
+                    Fill(polygonVertices); // Fill the polygon
                 }
             }
         }
@@ -351,7 +345,7 @@ namespace Connoreaster
         /// <summary>
         /// Evaluate the pairs of vertices
         /// </summary>
-        public void EvaluatePairs(List<Vector3> vertices, List<Vector3> polygon)
+        public void EvaluatePairs(List<Vector3> vertices, List<Vector3> polygonVertices)
         {
             bool isDone = false; // Create a boolean to determine if the loop is done
             while (!isDone)
@@ -362,16 +356,16 @@ namespace Connoreaster
                 for (int i = 0; i < newVertices.Count; i += 2)
                 {
                     // If the first vertex is in the polygon and the second vertex is not. Else if the second vertex is in the polygon and the first vertex is not
-                    if (newVertices[i] == polygon[polygon.Count - 1] && !vertices.Contains(newVertices[i + 1]))
+                    if (newVertices[i] == polygonVertices[polygonVertices.Count - 1] && !vertices.Contains(newVertices[i + 1]))
                     {
                         isDone = false;
-                        polygon.Add(newVertices[i + 1]); // Add the next vertex to the polygon list
+                        polygonVertices.Add(newVertices[i + 1]); // Add the next vertex to the polygon list
                         vertices.Add(newVertices[i + 1]); // Add the next vertex to the list of vertices
                     }
-                    else if (newVertices[i + 1] == polygon[polygon.Count - 1] && !vertices.Contains(newVertices[i]))
+                    else if (newVertices[i + 1] == polygonVertices[polygonVertices.Count - 1] && !vertices.Contains(newVertices[i]))
                     {
                         isDone = false;
-                        polygon.Add(newVertices[i]); // Add the next vertex to the polygon list
+                        polygonVertices.Add(newVertices[i]); // Add the next vertex to the polygon list
                         vertices.Add(newVertices[i]); // Add the next vertex to the list of vertices
                     }
                 }
@@ -381,17 +375,17 @@ namespace Connoreaster
         /// <summary>
         /// Fill the polygon
         /// </summary>
-        private void Fill(List<Vector3> vertices)
+        private void Fill(List<Vector3> polygonVertices)
         {
             Vector3 centerPosition = Vector3.zero; // Create a new vector for the center position
 
             // Loop through all the vertices in the polygon
-            for (int i = 0; i < vertices.Count; i++)
+            for (int i = 0; i < polygonVertices.Count; i++)
             {
-                centerPosition += vertices[i];
+                centerPosition += polygonVertices[i];
             }
 
-            centerPosition /= vertices.Count; // Set the center position to the average of all the vertices
+            centerPosition /= polygonVertices.Count; // Set the center position to the average of all the vertices
 
             // Create an upward axis used to determine the orientation of the plane
             Vector3 up = new Vector3()
@@ -408,9 +402,9 @@ namespace Connoreaster
             Vector2 uv2 = Vector2.zero; // Create a new vector for the second UV
 
             // Loop through all the vertices in the polygon
-            for (int i = 0; i < vertices.Count; i++)
+            for (int i = 0; i < polygonVertices.Count; i++)
             {
-                displacement = vertices[i] - centerPosition; // Set the displacement to the difference between the vertex and the center position
+                displacement = polygonVertices[i] - centerPosition; // Set the displacement to the difference between the vertex and the center position
 
                 // Set the UVs to the dot product of the displacement and the left and up axes
                 uv1 = new Vector2()
@@ -419,7 +413,7 @@ namespace Connoreaster
                     y = 0.5f + Vector3.Dot(displacement, up)
                 };
 
-                displacement = vertices[(i + 1) % vertices.Count] - centerPosition; // Set the displacement to the difference between the next vertex and the center position
+                displacement = polygonVertices[(i + 1) % polygonVertices.Count] - centerPosition; // Set the displacement to the difference between the next vertex and the center position
 
                 // Set the UVs to the dot product of the displacement and the left and up axes
                 uv2 = new Vector2()
@@ -429,19 +423,19 @@ namespace Connoreaster
                 };
 
                 bool isMesh1 = true;
-                CheckFillFlip(mesh1, vertices, centerPosition, uv1, uv2, isMesh1, i); // Check if the fill should be flipped for the first mesh
+                CheckFillFlip(mesh1, polygonVertices, centerPosition, uv1, uv2, isMesh1, i); // Check if the fill should be flipped for the first mesh
 
                 isMesh1 = false;
-                CheckFillFlip(mesh2, vertices, centerPosition, uv1, uv2, isMesh1, i); // Check if the fill should be flipped for the second mesh
+                CheckFillFlip(mesh2, polygonVertices, centerPosition, uv1, uv2, isMesh1, i); // Check if the fill should be flipped for the second mesh
             }
         }
 
         /// <summary>
         /// Check if the fill should be flipped
         /// </summary>
-        private void CheckFillFlip(GeneratedMeshData mesh, List<Vector3> vertices, Vector3 centerPosition, Vector2 uv1, Vector2 uv2, bool isMesh1, int index)
+        private void CheckFillFlip(GeneratedMeshData mesh, List<Vector3> polygonVertices, Vector3 centerPosition, Vector2 uv1, Vector2 uv2, bool isMesh1, int index)
         {
-            Vector3[] _vertices = { vertices[index], vertices[(index + 1) % vertices.Count], centerPosition }; // Create an array of vertices and set the first two to the current and next vertex and the third to the center position
+            Vector3[] _vertices = { polygonVertices[index], polygonVertices[(index + 1) % polygonVertices.Count], centerPosition }; // Create an array of vertices and set the first two to the current and next vertex and the third to the center position
             Vector3[] _normals;
             Vector2[] _uvs = { uv1, uv2, new(0.5f, 0.5f) }; // Create an array of UVs and set the first two to the UVs and the third to the center UV
 
@@ -518,11 +512,6 @@ namespace Connoreaster
             secondMeshGO.transform.localScale = hitGameObject.transform.localScale; // Set the scale of the second mesh to the scale of the first mesh
             secondMeshGO.AddComponent<MeshRenderer>(); // Add a mesh renderer to the second mesh
 
-            // if (hitGameObject.GetComponent<MeshShatter>() != null)
-            // {
-            //     secondMeshGO.AddComponent<MeshShatter>().debugColour = debugColour; // Add a mesh shatter script to the second mesh if the original mesh has one
-            // }
-
             if (hitGameObject.GetComponent<MeshSizeLimit>() == null)
             {
                 secondMeshGO.AddComponent<MeshSizeLimit>(); // Add a mesh size limit script to the second mesh if the original mesh doesn't have one
@@ -553,6 +542,11 @@ namespace Connoreaster
             foreach (var col in cols)
             {
                 col.convex = true;
+
+                if (!col.convex)
+                {
+                    col.gameObject.SetActive(false);
+                }
             }
 
             AddRigidBody(secondMeshGO); // Add a rigidbody to the second mesh

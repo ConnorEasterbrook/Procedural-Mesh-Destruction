@@ -2412,5 +2412,9 @@ PrefabInstance:
       propertyPath: mouseTrackingObject
       value: 
       objectReference: {fileID: 2143290117}
+    - target: {fileID: 8323094434569036779, guid: c5e25b380d4759343b2ffe0a76fd6fab, type: 3}
+      propertyPath: m_Center.y
+      value: 0.5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c5e25b380d4759343b2ffe0a76fd6fab, type: 3}

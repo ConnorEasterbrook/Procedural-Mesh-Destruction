@@ -34,10 +34,10 @@ public class AttackController : MonoBehaviour
     public Collider gunCollider;
     private bool sword = true;
 
-    // void Awake()
-    // {
-    //     Animator _animator = GetComponent<Animator>();
-    // }
+    void Awake()
+    {
+        _animator.SetBool("holdingSword", true);
+    }
 
     void Update()
     {
