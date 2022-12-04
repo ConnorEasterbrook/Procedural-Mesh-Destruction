@@ -484,24 +484,17 @@ namespace Connoreaster
             collider.sharedMesh = completeMesh1; // Set the collider's mesh to the first mesh
             collider.convex = true; // Set the collider to convex since convex colliders are faster
 
-            Material[] mats = new Material[completeMesh1.subMeshCount]; // Create a new array of materials
-
-            // Loop through all the materials in the original mesh
-            for (int i = 0; i < completeMesh1.subMeshCount; i++)
-            {
-                mats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
-            }
-            hitGameObject.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
+            AddMaterial(completeMesh1, hitGameObject, hitGameObject, true); // Add the material to the first object
 
             if (hitGameObject.GetComponent<MeshSizeLimit>() == null)
             {
                 hitGameObject.AddComponent<MeshSizeLimit>(); // Add a mesh size limit script to the second mesh if the original mesh doesn't have one
             }
 
-            CreateSecondMesh(hitGameObject, mats);
+            CreateSecondMesh(hitGameObject);
         }
 
-        private void CreateSecondMesh(GameObject hitGameObject, Material[] mats)
+        private void CreateSecondMesh(GameObject hitGameObject)
         {
             Mesh completeMesh2 = mesh2.GetGeneratedMesh();
 
@@ -521,20 +514,8 @@ namespace Connoreaster
                 secondMeshGO.AddComponent<MeshSizeLimit>().isPlane = hitGameObject.GetComponent<MeshSizeLimit>().isPlane; // Add a mesh size limit script to the second mesh
             }
 
-            mats = new Material[completeMesh2.subMeshCount]; // Create a new array of materials
-
-            // Loop through all the materials in the original mesh
-            for (int i = 0; i < completeMesh2.subMeshCount; i++)
-            {
-                mats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
-
-                if (debugColour)
-                {
-                    Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
-                    mats[i].color = colorPicker;
-                }
-            }
-            secondMeshGO.GetComponent<MeshRenderer>().materials = mats; // Set the materials to the new array of materials
+            AddMaterial(completeMesh2, hitGameObject, secondMeshGO, false); // Add the material to the second mesh
+            
             secondMeshGO.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
 
             secondMeshGO.AddComponent<MeshCollider>().sharedMesh = completeMesh2; // Add a mesh collider to the second mesh and set the mesh to the second mesh
@@ -550,6 +531,32 @@ namespace Connoreaster
             }
 
             AddRigidBody(secondMeshGO); // Add a rigidbody to the second mesh
+        }
+
+        private void AddMaterial(Mesh mesh, GameObject hitGameObject, GameObject newGameObject, bool isMesh1)
+        {
+            MeshRenderer meshRenderer = new MeshRenderer(); // Create a new mesh renderer
+            isMesh1 = false ? meshRenderer = newGameObject.AddComponent<MeshRenderer>() : meshRenderer = hitGameObject.GetComponent<MeshRenderer>(); // Add a mesh renderer to the new object
+            Material[] oldMats = hitGameObject.GetComponent<MeshRenderer>().materials; // Get the materials of the original object
+            Material[] newMats = new Material[mesh.subMeshCount]; // Create a new array of materials
+
+            for (int i = 0; i < mesh.subMeshCount; i++)
+            {
+                if (oldMats.Length > i)
+                {
+                    if (oldMats[i] != null)
+                    {
+                        newMats[i] = oldMats[i]; // Set the material to the original material
+                    }
+                }
+                else
+                {
+                    newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+                }
+            }
+
+            // meshRenderer.materials = newMats; // Set the materials to the new array of materials
+            newGameObject.GetComponent<MeshRenderer>().materials = newMats;
         }
 
         private void AddRigidBody(GameObject secondMesh)
