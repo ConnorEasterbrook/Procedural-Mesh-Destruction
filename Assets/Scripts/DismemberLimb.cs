@@ -30,6 +30,8 @@ public class DismemberLimb : MonoBehaviour
     private GameObject limbPrefab;
     public GameObject woundPrefab;
     public bool noDismember;
+    public GameObject limbBin;
+    public GameObject replacementLimb;
 
     // Start is called before the first frame update
     void Start()
@@ -44,44 +46,60 @@ public class DismemberLimb : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    void Update()
+    void OnEnable()
     {
-
+        Physics.IgnoreCollision(GetComponent<Collider>(), GetComponentInParent<Collider>(), true);
+        Physics.IgnoreCollision(GetComponent<Collider>(), GetComponentInChildren<Collider>(), true);
     }
 
     public void GetHit()
     {
         if (childLimbs.Length > 0 && !noDismember)
         {
-            foreach (DismemberLimb limb in childLimbs)
-            {
-                if (limb != null)
-                {
-                    limb.CalculateHit();
-                }
-            }
+            // foreach (DismemberLimb limb in childLimbs)
+            // {
+            //     if (limb != null)
+            //     {
+            //         limb.CalculateHit();
+            //     }
+            // }
+
+            CalculateHit();
         }
     }
 
     public void CalculateHit()
     {
-        transform.localScale = Vector3.zero;
+        // transform.localScale = Vector3.zero;
 
         if (woundPrefab != null)
         {
             woundPrefab.SetActive(true);
         }
 
-        //! NEED MESH WITH LIMB MODELS... SKINNED MESH RENDERER WILL ONLY HAVE ONE MESH
-        // GameObject newLimb = Instantiate(limbPrefab, transform.position, transform.rotation);
-        // newLimb.transform.localScale = Vector3.one;
-        // newLimb.transform.parent = transform.parent;
-        // newLimb.GetComponent<DismemberLimb>().noDismember = true;
-        // newLimb.GetComponent<Rigidbody>().isKinematic = false;
-        // newLimb.GetComponent<Rigidbody>().useGravity = true;
+        GameObject newLimb = Instantiate(limbPrefab, transform.position, transform.rotation, limbBin.transform);
+        newLimb.transform.localScale = Vector3.one;
+        newLimb.GetComponent<DismemberLimb>().noDismember = true;
+        Destroy(newLimb.GetComponentInChildren<CharacterJoint>());
 
-        Destroy(this);
+        foreach (Rigidbody rb in newLimb.GetComponentsInChildren<Rigidbody>())
+        {
+            rb.isKinematic = false;
+            rb.useGravity = true;
+        }
+
+        // foreach (DismemberLimb limb in newLimb.GetComponentsInChildren<DismemberLimb>())
+        // {
+        //     limb.noDismember = true;
+        // }
+
+        // m.GetChild(0).gameObject, transform.GetChild(0).position, transform.GetChild(0).rotation, limbBin.transform);
+        // Destroy(newLimbChild.GetComponent<CharacterJoint>());
+        // GameObject newLimb = Instantiate(replacementLimb, transform.position, transform.rotation, limbBin.transform);
+        // Destroy(newLimb.GetComponent<CharacterJoint>()
+
+        transform.localScale = Vector3.zero;
+        Destroy(gameObject);
     }
 
     private void OnCollisionEnter(Collision collision)

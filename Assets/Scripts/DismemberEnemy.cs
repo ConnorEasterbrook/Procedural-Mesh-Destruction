@@ -44,11 +44,14 @@ public class DismemberEnemy : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (head.transform.localScale == Vector3.zero)
+        if (head != null)
         {
-            _animator.enabled = false;
+            if (head.transform.localScale == Vector3.zero)
+            {
+                _animator.enabled = false;
 
-            ActivateRagdoll();
+                ActivateRagdoll();
+            }
         }
     }
 
