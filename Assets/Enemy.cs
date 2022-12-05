@@ -24,35 +24,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Connoreaster
+public class Enemy : MonoBehaviour
 {
-    public class DismemberHelper
+    public GameObject particlePrefab;
+    public float health = 100f;
+
+    private void Awake()
     {
-        public void RemoveComponents(GameObject limb)
+        gameObject.tag = "Untagged";
+    }
+
+    private void Update()
+    {
+        if (health <= 0)
         {
-            if (limb.tag == "Limb")
-            {
-                limb.tag = "Sliceable";
-
-                Debug.Log("Removing components");
-                GameObject newLimb = GameObject.Instantiate(limb, limb.transform.position, limb.transform.rotation);
-                newLimb.GetComponent<Rigidbody>().isKinematic = false;
-                newLimb.GetComponent<Rigidbody>().useGravity = true;
-                MonoBehaviour.Destroy(newLimb.GetComponent<CharacterJoint>());
-
-                MonoBehaviour.Destroy(limb.gameObject);
-
-                var list = newLimb.GetComponentsInChildren<Transform>();
-                foreach (Transform child in list)
-                {
-                    child.GetComponent<Rigidbody>().isKinematic = false;
-                    child.GetComponent<Rigidbody>().useGravity = true;
-                }
-            }
-
-            MonoBehaviour.Destroy(limb.GetComponent<CharacterJoint>());
-            limb.GetComponent<Rigidbody>().isKinematic = false;
-            limb.GetComponent<Rigidbody>().useGravity = true;
+            gameObject.tag = "Limb";
         }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.tag == "Weapon")
+        {
+            Splatter();
+            UpdateLimbHealth();
+        }
+    }
+
+    public void UpdateLimbHealth()
+    {
+        health -= 50f;
+    }
+
+    private void Splatter()
+    {
+        Debug.Log("Splatter");
+        GameObject ps = Instantiate(particlePrefab, transform);
     }
 }

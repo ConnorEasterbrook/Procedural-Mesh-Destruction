@@ -50,12 +50,6 @@ namespace Connoreaster
                     {
                         Cut(collision.gameObject);
                     }
-
-                    // Destroy(gameObject);
-                    // if (gameObject.tag == "Sliceable")
-                    // {
-                    //     Destroy(collision.gameObject);
-                    // }
                 }
             }
         }

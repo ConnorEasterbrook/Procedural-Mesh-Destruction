@@ -39,20 +39,6 @@ namespace Connoreaster
 
         public DebugController debugController;
 
-        private void Update()
-        {
-            // if (Input.GetMouseButtonDown(0))
-            // {
-            //     enterPos = tip.transform.position;
-            //     baseEnterPos = baseOfWeapon.transform.position;
-            // }
-            // if (Input.GetMouseButtonUp(0))
-            // {
-            //     exitPos = tip.transform.position;
-            //     Cut();
-            // }
-        }
-
         private void OnTriggerEnter(Collider other)
         {
             enterPos = tip.transform.position;
@@ -61,37 +47,39 @@ namespace Connoreaster
 
         private void OnTriggerExit(Collider other)
         {
-            exitPos = tip.transform.position;
-
-            //Create a triangle between the tip and base so that we can get the normal
-            Vector3 side1 = exitPos - enterPos;
-            Vector3 side2 = exitPos - baseEnterPos;
-
-            //Get the point perpendicular to the triangle above which is the normal
-            Vector3 normal = Vector3.Cross(side1, side2).normalized;
-
-            //Transform the normal so that it is aligned with the object we are slicing's transform.
-            Vector3 transformedNormal = ((Vector3)(other.gameObject.transform.localToWorldMatrix.transpose * normal)).normalized;
-
-            //Get the enter position relative to the object we're cutting's local transform
-            Vector3 transformedStartingPoint = other.gameObject.transform.InverseTransformPoint(enterPos);
-
-            slicePlane = new Plane();
-
-            slicePlane.SetNormalAndPosition(
-                    transformedNormal,
-                    transformedStartingPoint);
-
-            var direction = Vector3.Dot(Vector3.up, transformedNormal);
-
-            //Flip the plane so that we always know which side the positive mesh is on
-            if (direction < 0)
+            // Ensure the hit gameObject is sliceable
+            if (other.tag == "Sliceable" || other.gameObject.tag == "Limb")
             {
-                slicePlane = slicePlane.flipped;
-            }
+                exitPos = tip.transform.position;
 
-            // GameObject[] slices = Slicer.Slice(plane, other.gameObject);
-            Cut(other.gameObject);
+                //Create a triangle between the tip and base so that we can get the normal
+                Vector3 side1 = exitPos - enterPos;
+                Vector3 side2 = exitPos - baseEnterPos;
+
+                //Get the point perpendicular to the triangle above which is the normal
+                Vector3 normal = Vector3.Cross(side1, side2).normalized;
+
+                //Transform the normal so that it is aligned with the object we are slicing's transform.
+                Vector3 transformedNormal = ((Vector3)(other.gameObject.transform.localToWorldMatrix.transpose * normal)).normalized;
+
+                //Get the enter position relative to the object we're cutting's local transform
+                Vector3 transformedStartingPoint = other.gameObject.transform.InverseTransformPoint(enterPos);
+
+                slicePlane = new Plane();
+
+                slicePlane.SetNormalAndPosition(transformedNormal, transformedStartingPoint);
+
+                var direction = Vector3.Dot(Vector3.up, transformedNormal);
+
+                //Flip the plane so that we always know which side the positive mesh is on
+                if (direction < 0)
+                {
+                    slicePlane = slicePlane.flipped;
+                }
+
+                // GameObject[] slices = Slicer.Slice(plane, other.gameObject);
+                Cut(other.gameObject);
+            }
         }
 
         /// <summary>
@@ -99,12 +87,9 @@ namespace Connoreaster
         /// </summary>
         private void Cut(GameObject hitGameObject)
         {
-            // Ensure the hit gameObject is sliceable
-            if (hitGameObject.tag != "Sliceable" || hitGameObject.gameObject.tag == "Limb")
-            {
-                MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-                calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
-            }
+            MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
+            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
+
         }
     }
 }
