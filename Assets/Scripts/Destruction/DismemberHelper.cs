@@ -28,16 +28,16 @@ namespace Connoreaster
 {
     public class DismemberHelper
     {
-        public void RemoveComponents(GameObject limb, Transform transform)
+        public void RemoveComponents(GameObject limb)
         {
             if (limb.tag == "Limb")
             {
-                GameObject newLimb = GameObject.Instantiate(limb, transform.position, transform.rotation);
+                GameObject newLimb = GameObject.Instantiate(limb, limb.transform.position, limb.transform.rotation);
                 newLimb.GetComponent<Rigidbody>().isKinematic = false;
                 newLimb.GetComponent<Rigidbody>().useGravity = true;
                 MonoBehaviour.Destroy(newLimb.GetComponent<DismemberLimb>());
                 MonoBehaviour.Destroy(newLimb.GetComponent<CharacterJoint>());
-                
+
                 MonoBehaviour.Destroy(limb.gameObject);
 
                 var list = newLimb.GetComponentsInChildren<Transform>();

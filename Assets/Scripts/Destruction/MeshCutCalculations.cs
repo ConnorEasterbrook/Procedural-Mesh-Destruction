@@ -497,6 +497,8 @@ namespace Connoreaster
             {
                 DeleteAfterSeven(hitGameObject);
             }
+
+            AddRigidBody(hitGameObject); // Add a rigidbody to the second mesh
         }
 
         private void CreateSecondMesh(GameObject hitGameObject)
@@ -543,11 +545,11 @@ namespace Connoreaster
                 DismemberHelper _helper = new DismemberHelper(); // Create a new dismember helper
                 if (hitGameObject.transform.childCount > 0)
                 {
-                    _helper.RemoveComponents(hitGameObject, hitGameObject.transform); // Remove the components from the hit game object
+                    _helper.RemoveComponents(hitGameObject); // Remove the components from the hit game object
                 }
                 else
                 {
-                    _helper.RemoveComponents(hitGameObject, hitGameObject.transform); // Remove the components from the hit game object
+                    _helper.RemoveComponents(hitGameObject); // Remove the components from the hit game object
                 }
             }
 
@@ -583,10 +585,18 @@ namespace Connoreaster
             newGameObject.GetComponent<MeshRenderer>().materials = newMats;
         }
 
-        private void AddRigidBody(GameObject secondMesh)
+        private void AddRigidBody(GameObject _GO)
         {
-            Rigidbody rightRigidbody = secondMesh.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
-            rightRigidbody.AddRelativeForce(-slicePlane.normal * explodeForce); // Add a force to the second mesh in the opposite direction of the slice plane for effect
+            if (_GO.GetComponent<Rigidbody>() == null)
+            {
+                Rigidbody rightRigidbody = _GO.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
+                rightRigidbody.AddRelativeForce(-slicePlane.normal * explodeForce); // Add a force to the second mesh in the opposite direction of the slice plane for effect
+            }
+            else
+            {
+                _GO.GetComponent<Rigidbody>().useGravity = true;
+                _GO.GetComponent<Rigidbody>().isKinematic = false;
+            }
         }
 
         private async void DeleteAfterSeven(GameObject _GO)
