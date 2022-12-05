@@ -22,13 +22,14 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Connoreaster
 {
     public class MeshSizeLimit : MonoBehaviour
     {
-        private float minShapeSize = 1.75f; // Set the minimum size of the shape
+        private float minShapeSize = 0.05f; // Set the minimum size of the shape
         public bool isPlane = false;
 
         // Update is called once per frame
@@ -41,6 +42,7 @@ namespace Connoreaster
             {
                 if (gameObjectMesh.bounds.size.x * gameObjectMesh.bounds.size.y * gameObjectMesh.bounds.size.z < minShapeSize / 100)
                 {
+                    Debug.Log("Mesh is too small, destroying");
                     Destroy(gameObject);
                 }
             }
@@ -48,6 +50,7 @@ namespace Connoreaster
             {
                 if (gameObjectMesh.bounds.size.x * gameObjectMesh.bounds.size.z < minShapeSize)
                 {
+                    Debug.Log("Mesh is too small, destroying");
                     Destroy(gameObject);
                 }
             }

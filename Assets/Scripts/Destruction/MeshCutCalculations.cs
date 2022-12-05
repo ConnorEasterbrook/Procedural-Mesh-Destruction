@@ -492,6 +492,11 @@ namespace Connoreaster
             }
 
             CreateSecondMesh(hitGameObject);
+
+            if (completeMesh1.bounds.size.x * completeMesh1.bounds.size.y * completeMesh1.bounds.size.z < 1.75f / 100)
+            {
+                DeleteAfterSeven(hitGameObject);
+            }
         }
 
         private void CreateSecondMesh(GameObject hitGameObject)
@@ -515,7 +520,7 @@ namespace Connoreaster
             }
 
             AddMaterial(completeMesh2, hitGameObject, secondMeshGO, false); // Add the material to the second mesh
-            
+
             secondMeshGO.AddComponent<MeshFilter>().mesh = completeMesh2; // Add a mesh filter to the second mesh and set the mesh to the second mesh
 
             secondMeshGO.AddComponent<MeshCollider>().sharedMesh = completeMesh2; // Add a mesh collider to the second mesh and set the mesh to the second mesh
@@ -531,6 +536,25 @@ namespace Connoreaster
             }
 
             AddRigidBody(secondMeshGO); // Add a rigidbody to the second mesh
+
+
+            if (hitGameObject.tag == "Limb")
+            {
+                DismemberHelper _helper = new DismemberHelper(); // Create a new dismember helper
+                if (hitGameObject.transform.childCount > 0)
+                {
+                    _helper.RemoveComponents(hitGameObject, hitGameObject.transform); // Remove the components from the hit game object
+                }
+                else
+                {
+                    _helper.RemoveComponents(hitGameObject, hitGameObject.transform); // Remove the components from the hit game object
+                }
+            }
+
+            if (completeMesh2.bounds.size.x * completeMesh2.bounds.size.y * completeMesh2.bounds.size.z < 1.75f / 100)
+            {
+                DeleteAfterSeven(secondMeshGO);
+            }
         }
 
         private void AddMaterial(Mesh mesh, GameObject hitGameObject, GameObject newGameObject, bool isMesh1)
@@ -563,6 +587,15 @@ namespace Connoreaster
         {
             Rigidbody rightRigidbody = secondMesh.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
             rightRigidbody.AddRelativeForce(-slicePlane.normal * explodeForce); // Add a force to the second mesh in the opposite direction of the slice plane for effect
+        }
+
+        private async void DeleteAfterSeven(GameObject _GO)
+        {
+            await Task.Delay(7000);
+            if (_GO != null)
+            {
+                MonoBehaviour.Destroy(_GO);
+            }
         }
     }
 }

@@ -31,7 +31,6 @@ public class DismemberLimb : MonoBehaviour
     public GameObject woundPrefab;
     public bool noDismember;
     public GameObject limbBin;
-    public GameObject replacementLimb;
 
     // Start is called before the first frame update
     void Start()
@@ -56,22 +55,12 @@ public class DismemberLimb : MonoBehaviour
     {
         if (childLimbs.Length > 0 && !noDismember)
         {
-            // foreach (DismemberLimb limb in childLimbs)
-            // {
-            //     if (limb != null)
-            //     {
-            //         limb.CalculateHit();
-            //     }
-            // }
-
             CalculateHit();
         }
     }
 
     public void CalculateHit()
     {
-        // transform.localScale = Vector3.zero;
-
         if (woundPrefab != null)
         {
             woundPrefab.SetActive(true);
@@ -88,16 +77,6 @@ public class DismemberLimb : MonoBehaviour
             rb.useGravity = true;
         }
 
-        // foreach (DismemberLimb limb in newLimb.GetComponentsInChildren<DismemberLimb>())
-        // {
-        //     limb.noDismember = true;
-        // }
-
-        // m.GetChild(0).gameObject, transform.GetChild(0).position, transform.GetChild(0).rotation, limbBin.transform);
-        // Destroy(newLimbChild.GetComponent<CharacterJoint>());
-        // GameObject newLimb = Instantiate(replacementLimb, transform.position, transform.rotation, limbBin.transform);
-        // Destroy(newLimb.GetComponent<CharacterJoint>()
-
         transform.localScale = Vector3.zero;
         Destroy(gameObject);
     }
@@ -106,7 +85,6 @@ public class DismemberLimb : MonoBehaviour
     {
         if (collision.gameObject.tag == "Weapon")
         {
-            Debug.Log("Hit");
             GetHit();
         }
     }

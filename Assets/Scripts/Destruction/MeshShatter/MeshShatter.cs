@@ -40,26 +40,9 @@ namespace Connoreaster
         private MeshTriangleData triangle;
         public DebugController debugController;
 
-        // Update is called once per frame
-        void Update()
-        {
-            //     if (Input.GetMouseButtonDown(0))
-            //     {
-            //         if (!isShattered)
-            //         {
-            //             for (int i = 0; i < shatterIterations; i++)
-            //             {
-            //                 Cut();
-            //             }
-
-            //             isShattered = true;
-            //         }
-            //     }
-        }
-
         void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.tag == "Sliceable")
+            if (collision.gameObject.tag == "Sliceable" || collision.gameObject.tag == "Limb")
             {
                 if (!isShattered)
                 {
@@ -68,9 +51,11 @@ namespace Connoreaster
                         Cut(collision.gameObject);
                     }
 
-                    Destroy(gameObject);
-                    Destroy(collision.gameObject);
-                    // isShattered = true;
+                    // Destroy(gameObject);
+                    // if (gameObject.tag == "Sliceable")
+                    // {
+                    //     Destroy(collision.gameObject);
+                    // }
                 }
             }
         }
@@ -86,7 +71,7 @@ namespace Connoreaster
             slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3
             (
                 gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
-                UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y), 
+                UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
                 gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2
             ));
 
