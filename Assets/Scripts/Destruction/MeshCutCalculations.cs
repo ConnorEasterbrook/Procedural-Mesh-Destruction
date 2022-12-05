@@ -574,10 +574,22 @@ namespace Connoreaster
                     {
                         newMats[i] = oldMats[i]; // Set the material to the original material
                     }
+
+                    if (debugColour)
+                    {
+                        Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
+                        newMats[i].color = colorPicker;
+                    }
                 }
                 else
                 {
                     newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+
+                    if (debugColour)
+                    {
+                        Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
+                        newMats[i].color = colorPicker;
+                    }
                 }
             }
 

@@ -42,7 +42,6 @@ namespace Connoreaster
             {
                 if (gameObjectMesh.bounds.size.x * gameObjectMesh.bounds.size.y * gameObjectMesh.bounds.size.z < minShapeSize / 100)
                 {
-                    Debug.Log("Mesh is too small, destroying");
                     Destroy(gameObject);
                 }
             }
@@ -50,7 +49,6 @@ namespace Connoreaster
             {
                 if (gameObjectMesh.bounds.size.x * gameObjectMesh.bounds.size.z < minShapeSize)
                 {
-                    Debug.Log("Mesh is too small, destroying");
                     Destroy(gameObject);
                 }
             }

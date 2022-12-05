@@ -100,13 +100,11 @@ namespace Connoreaster
         private void Cut(GameObject hitGameObject)
         {
             // Ensure the hit gameObject is sliceable
-            if (hitGameObject.tag != "Sliceable")
+            if (hitGameObject.tag != "Sliceable" || hitGameObject.gameObject.tag == "Limb")
             {
-                return;
+                MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
+                calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
             }
-
-            MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
         }
     }
 }

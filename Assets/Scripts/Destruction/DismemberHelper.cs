@@ -35,7 +35,6 @@ namespace Connoreaster
                 GameObject newLimb = GameObject.Instantiate(limb, limb.transform.position, limb.transform.rotation);
                 newLimb.GetComponent<Rigidbody>().isKinematic = false;
                 newLimb.GetComponent<Rigidbody>().useGravity = true;
-                MonoBehaviour.Destroy(newLimb.GetComponent<DismemberLimb>());
                 MonoBehaviour.Destroy(newLimb.GetComponent<CharacterJoint>());
 
                 MonoBehaviour.Destroy(limb.gameObject);
@@ -45,13 +44,10 @@ namespace Connoreaster
                 {
                     child.GetComponent<Rigidbody>().isKinematic = false;
                     child.GetComponent<Rigidbody>().useGravity = true;
-                    // MonoBehaviour.Destroy(child.GetComponent<DismemberLimb>());
-                    // MonoBehaviour.Destroy(child.GetComponent<CharacterJoint>());
                 }
             }
 
             limb.tag = "Sliceable";
-            MonoBehaviour.Destroy(limb.GetComponent<DismemberLimb>());
             MonoBehaviour.Destroy(limb.GetComponent<CharacterJoint>());
             limb.GetComponent<Rigidbody>().isKinematic = false;
             limb.GetComponent<Rigidbody>().useGravity = true;

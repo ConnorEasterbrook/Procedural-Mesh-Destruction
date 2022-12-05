@@ -45,6 +45,7 @@ namespace Connoreaster
         private Vector3 baseEnterPos;
         private Vector3 exitPos;
         private ParticleSystem ps;
+        public DebugController debugController;
 
         private void Awake()
         {
@@ -133,9 +134,8 @@ namespace Connoreaster
                 ps = hitGameObject.GetComponentInChildren<ParticleSystem>();
                 ps.Play();
                 MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-                calc.CallScript(hitGameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
+                calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
             }
-
         }
     }
 }

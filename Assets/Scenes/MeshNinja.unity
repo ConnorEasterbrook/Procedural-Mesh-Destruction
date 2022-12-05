@@ -249,9 +249,9 @@ GameObject:
   - component: {fileID: 385293739}
   - component: {fileID: 385293742}
   - component: {fileID: 385293741}
-  - component: {fileID: 385293740}
   - component: {fileID: 385293744}
   - component: {fileID: 385293743}
+  - component: {fileID: 385293745}
   m_Layer: 0
   m_Name: Capsule
   m_TagString: Sliceable
@@ -274,20 +274,6 @@ Transform:
   m_Father: {fileID: 830052691}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &385293740
-CapsuleCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 385293738}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  m_Radius: 0.5
-  m_Height: 2
-  m_Direction: 1
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &385293741
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -5175,6 +5161,20 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!64 &385293745
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 385293738}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10208, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &547125084
 GameObject:
   m_ObjectHideFlags: 0
@@ -5186,9 +5186,9 @@ GameObject:
   - component: {fileID: 547125085}
   - component: {fileID: 547125088}
   - component: {fileID: 547125087}
-  - component: {fileID: 547125086}
   - component: {fileID: 547125090}
   - component: {fileID: 547125089}
+  - component: {fileID: 547125091}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Sliceable
@@ -5211,19 +5211,6 @@ Transform:
   m_Father: {fileID: 830052691}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &547125086
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 547125084}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &547125087
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -10111,6 +10098,20 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!64 &547125091
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 547125084}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &642942783
 GameObject:
   m_ObjectHideFlags: 0
@@ -10124,6 +10125,7 @@ GameObject:
   - component: {fileID: 642942785}
   - component: {fileID: 642942790}
   - component: {fileID: 642942791}
+  - component: {fileID: 642942792}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Untagged
@@ -10232,6 +10234,20 @@ MonoBehaviour:
   debugColour: 1
   tip: {fileID: 90971878}
   baseOfWeapon: {fileID: 1547756013}
+  debugController: {fileID: 642942792}
+--- !u!114 &642942792
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 642942783}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9bb88e93e19fbc4d862f12c7c78130a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  debugColourSlice: 1
 --- !u!1 &767458699
 GameObject:
   m_ObjectHideFlags: 0
@@ -10444,10 +10460,10 @@ GameObject:
   - component: {fileID: 985940703}
   - component: {fileID: 985940707}
   - component: {fileID: 985940706}
-  - component: {fileID: 985940705}
   - component: {fileID: 985940704}
   - component: {fileID: 985940709}
   - component: {fileID: 985940708}
+  - component: {fileID: 985940710}
   m_Layer: 0
   m_Name: Sphere
   m_TagString: Sliceable
@@ -10486,19 +10502,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!135 &985940705
-SphereCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 985940702}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.5
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!23 &985940706
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -15386,6 +15389,20 @@ ParticleSystemRenderer:
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
   m_MaskInteraction: 0
+--- !u!64 &985940710
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 985940702}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &993257129
 GameObject:
   m_ObjectHideFlags: 0
