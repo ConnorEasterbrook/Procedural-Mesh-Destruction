@@ -565,6 +565,12 @@ namespace Connoreaster
             isMesh1 = false ? meshRenderer = newGameObject.AddComponent<MeshRenderer>() : meshRenderer = hitGameObject.GetComponent<MeshRenderer>(); // Add a mesh renderer to the new object
             Material[] oldMats = hitGameObject.GetComponent<MeshRenderer>().materials; // Get the materials of the original object
             Material[] newMats = new Material[mesh.subMeshCount]; // Create a new array of materials
+            Material innerMat = null;
+
+            if (hitGameObject.GetComponent<InnerMaterial>() != null)
+            {
+                innerMat = hitGameObject.GetComponent<InnerMaterial>().innerMaterial; // Get the inner material of the original object
+            }
 
             for (int i = 0; i < mesh.subMeshCount; i++)
             {
@@ -583,7 +589,16 @@ namespace Connoreaster
                 }
                 else
                 {
-                    newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+                    // newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+
+                    if (innerMat != null)
+                    {
+                        newMats[i] = innerMat;
+                    }
+                    else
+                    {
+                        newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+                    }
 
                     if (debugColour)
                     {
@@ -594,6 +609,7 @@ namespace Connoreaster
             }
 
             // meshRenderer.materials = newMats; // Set the materials to the new array of materials
+            newGameObject.AddComponent<InnerMaterial>().innerMaterial = hitGameObject.GetComponent<InnerMaterial>().innerMaterial;
             newGameObject.GetComponent<MeshRenderer>().materials = newMats;
         }
 
