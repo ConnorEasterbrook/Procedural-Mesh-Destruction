@@ -471,6 +471,7 @@ namespace Connoreaster
         private void CreateFirstMesh(GameObject hitGameObject)
         {
             Mesh completeMesh1 = mesh1.GetGeneratedMesh();
+            RecalculateUVs(completeMesh1); // Recalculate the UVs of the first mesh
 
             // Remove all current colliders on the object to avoid duplicates and update the mesh bounds
             Collider[] originalCols = hitGameObject.GetComponents<Collider>();
@@ -504,6 +505,7 @@ namespace Connoreaster
         private void CreateSecondMesh(GameObject hitGameObject)
         {
             Mesh completeMesh2 = mesh2.GetGeneratedMesh();
+            RecalculateUVs(completeMesh2); // Recalculate the UVs of the second mesh
 
             secondMeshGO = new GameObject(); // Create a new game object for the second mesh
             secondMeshGO.tag = "Sliceable"; // Set the tag to sliceable
@@ -557,6 +559,21 @@ namespace Connoreaster
             {
                 DeleteAfterSeven(secondMeshGO);
             }
+        }
+
+        private void RecalculateUVs(Mesh mesh)
+        {
+            Bounds bounds = mesh.bounds;
+            Vector3[] vertices = mesh.vertices;
+            Vector2[] uvs = new Vector2[vertices.Length];
+
+            for (int i = 0; i < vertices.Length; i++)
+            {
+                Vector3 v = vertices[i];
+                uvs[i] = new Vector2((v.x - bounds.min.x) / bounds.size.x, (v.y - bounds.min.y) / bounds.size.y);
+            }
+
+            mesh.uv = uvs;
         }
 
         private void AddMaterial(Mesh mesh, GameObject hitGameObject, GameObject newGameObject, bool isMesh1)

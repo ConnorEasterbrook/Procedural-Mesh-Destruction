@@ -90,6 +90,7 @@ namespace Connoreaster
             {
                 mesh.SetTriangles(submeshIndices[i], i);
             }
+
             return mesh;
         }
     }
