@@ -33,10 +33,10 @@ namespace Connoreaster
 {
     public class MeshCutCalculations
     {
-        private static Mesh sentGameObjectMesh;
+        public Mesh sentGameObjectMesh;
         private Plane slicePlane;
-        private GeneratedMeshData mesh1;
-        private GeneratedMeshData mesh2;
+        public GeneratedMeshData mesh1;
+        public GeneratedMeshData mesh2;
         private List<Vector3> newVertices;
         private MeshTriangleData triangle;
         private GameObject secondMeshGO;
@@ -54,7 +54,10 @@ namespace Connoreaster
             debugColour = _debugColour;
 
             SeparateMeshes();
-            BeginFill();
+            
+            MeshFillCalculations meshFillCalculations = new MeshFillCalculations(this, newVertices, slicePlane);
+            meshFillCalculations.CallScript();
+
             CreateFirstMesh(_sentGameObject);
         }
 
@@ -291,124 +294,6 @@ namespace Connoreaster
 
                 mesh.AddTriangle(testTriangle); // Add the triangle to the mesh
             }
-        }
-
-        /// <summary>
-        /// Begin the process of filling in the cross section of the sliced mesh
-        /// </summary>
-        public void BeginFill()
-        {
-
-            List<Vector3> vertices = new List<Vector3>(); // Create a list of vertices
-            List<Vector3> polygonVertices = new List<Vector3>(); // Create a list of vertices for the polygon
-
-            // Loop through all the vertices in the mesh
-            for (int i = 0; i < newVertices.Count; i++)
-            {
-                // If the vertex is not in the list of vertices
-                if (!vertices.Contains(newVertices[i]))
-                {
-                    polygonVertices.Clear(); // Clear the polygon list
-                    polygonVertices.Add(newVertices[i]); // Add the vertex to the polygon list
-                    polygonVertices.Add(newVertices[i + 1]); // Add the next vertex to the polygon list
-
-                    vertices.Add(newVertices[i]); // Add the vertex to the list of vertices. This is used to prevent duplicate vertices
-                    vertices.Add(newVertices[i + 1]);
-
-                    EvaluatePairs(vertices, polygonVertices); // Evaluate the pairs of vertices
-                    Fill(polygonVertices); // Fill the polygon
-                }
-            }
-        }
-
-        /// <summary>
-        /// Evaluate the pairs of vertices
-        /// </summary>
-        public void EvaluatePairs(List<Vector3> vertices, List<Vector3> polygonVertices)
-        {
-            bool isDone = false; // Create a boolean to determine if the loop is done
-            while (!isDone)
-            {
-                isDone = true; // Set the boolean to true so that it only loops once if no pairs are found
-
-                // Loop through all the vertices in the mesh
-                for (int i = 0; i < newVertices.Count; i += 2)
-                {
-                    // If the first vertex is in the polygon and the second vertex is not. Else if the second vertex is in the polygon and the first vertex is not
-                    if (newVertices[i] == polygonVertices[polygonVertices.Count - 1] && !vertices.Contains(newVertices[i + 1]))
-                    {
-                        isDone = false;
-                        polygonVertices.Add(newVertices[i + 1]); // Add the next vertex to the polygon list
-                        vertices.Add(newVertices[i + 1]); // Add the next vertex to the list of vertices
-                    }
-                    else if (newVertices[i + 1] == polygonVertices[polygonVertices.Count - 1] && !vertices.Contains(newVertices[i]))
-                    {
-                        isDone = false;
-                        polygonVertices.Add(newVertices[i]); // Add the next vertex to the polygon list
-                        vertices.Add(newVertices[i]); // Add the next vertex to the list of vertices
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Fill the polygon
-        /// </summary>
-        private void Fill(List<Vector3> polygonVertices)
-        {
-            Vector3 centerPosition = Vector3.zero; // Create a new vector for the center position
-
-            // Loop through all the vertices in the polygon
-            for (int i = 0; i < polygonVertices.Count; i++)
-            {
-                centerPosition += polygonVertices[i];
-            }
-
-            centerPosition /= polygonVertices.Count; // Set the center position to the average of all the vertices
-
-            // Loop through all the vertices in the polygon
-            for (int i = 0; i < polygonVertices.Count; i++)
-            {
-                bool isMesh1 = true;
-                CheckFillFlip(mesh1, polygonVertices, centerPosition, isMesh1, i); // Check if the fill should be flipped for the first mesh
-
-                isMesh1 = false;
-                CheckFillFlip(mesh2, polygonVertices, centerPosition, isMesh1, i); // Check if the fill should be flipped for the second mesh
-            }
-        }
-
-        /// <summary>
-        /// Check if the fill should be flipped
-        /// </summary>
-        private void CheckFillFlip(GeneratedMeshData mesh, List<Vector3> polygonVertices, Vector3 centerPosition, bool isMesh1, int index)
-        {
-            Vector3[] _vertices = { polygonVertices[index], polygonVertices[(index + 1) % polygonVertices.Count], centerPosition }; // Create an array of vertices and set the first two to the current and next vertex and the third to the center position
-            Vector3[] _normals;
-
-            if (isMesh1)
-            {
-                _normals = new[] { -slicePlane.normal, -slicePlane.normal, -slicePlane.normal }; // Create an array of normals and set all three to the negative normal of the slice plane
-            }
-            else
-            {
-                _normals = new[] { slicePlane.normal, slicePlane.normal, slicePlane.normal }; // Set all three normals to the positive normal of the slice plane
-            }
-
-            MeshTriangleData fillTriangle = new MeshTriangleData(_vertices, _normals, sentGameObjectMesh.subMeshCount + 1); // Create a new triangle using the previous arrays
-
-            // If the Dot Cross product is negative then the triangle needs to be flipped
-            if (Vector3.Dot(Vector3.Cross(_vertices[1] - _vertices[0], _vertices[2] - _vertices[0]), _normals[0]) < 0)
-            {
-                Vector3 temp = fillTriangle.vertices[2]; // Store the third vertex
-                fillTriangle.vertices[2] = fillTriangle.vertices[0]; // Set the third vertex to the first vertex
-                fillTriangle.vertices[0] = temp; // Set the first vertex to the previous third vertex position
-
-                temp = fillTriangle.normals[2]; // Store the third normal
-                fillTriangle.normals[2] = fillTriangle.normals[0]; // Set the third normal to the first normal
-                fillTriangle.normals[0] = temp; // Set the first normal to the previous third normal position
-            }
-
-            mesh.AddTriangle(fillTriangle); // Add the triangle to the second mesh
         }
 
         /// <summary>
