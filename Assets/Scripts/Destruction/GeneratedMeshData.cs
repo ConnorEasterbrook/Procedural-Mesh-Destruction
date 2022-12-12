@@ -30,7 +30,7 @@ namespace Connoreaster
     {
         List<Vector3> vertices = new List<Vector3>();
         List<Vector3> normals = new List<Vector3>();
-        List<Vector2> uv = new List<Vector2>();
+        // List<Vector2> uv = new List<Vector2>();
         List<List<int>> submeshIndices = new List<List<int>>();
 
         public void AddTriangle(MeshTriangleData _triangle)
@@ -39,7 +39,6 @@ namespace Connoreaster
 
             vertices.AddRange(_triangle.vertices);
             normals.AddRange(_triangle.normals);
-            uv.AddRange(_triangle.UVs);
 
             if (submeshIndices.Count < _triangle.subMeshIndex + 1)
             {
@@ -55,13 +54,12 @@ namespace Connoreaster
             }
         }
 
-        public void AddTriangle(Vector3[] _vertices, Vector3[] _normals, Vector2[] _uvs, int _submeshIndex, Vector4[] _tangents = null)
+        public void AddTriangle(Vector3[] _vertices, Vector3[] _normals, int _submeshIndex, Vector4[] _tangents = null)
         {
             int currentVerticeCount = vertices.Count;
 
             vertices.AddRange(_vertices);
             normals.AddRange(_normals);
-            uv.AddRange(_uvs);
 
             if (submeshIndices.Count < _submeshIndex + 1)
             {
@@ -82,8 +80,6 @@ namespace Connoreaster
             Mesh mesh = new Mesh();
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);
-            mesh.SetUVs(0, uv);
-            mesh.SetUVs(1, uv);
 
             mesh.subMeshCount = submeshIndices.Count;
             for (int i = 0; i < submeshIndices.Count; i++)
@@ -91,7 +87,24 @@ namespace Connoreaster
                 mesh.SetTriangles(submeshIndices[i], i);
             }
 
+            RecalculateUVs(mesh);
+
             return mesh;
+        }
+
+        private void RecalculateUVs(Mesh mesh)
+        {
+            Bounds bounds = mesh.bounds;
+            Vector3[] _vertices = mesh.vertices;
+            Vector2[] _uvs = new Vector2[_vertices.Length];
+
+            for (int i = 0; i < _vertices.Length; i++)
+            {
+                Vector3 v = _vertices[i];
+                _uvs[i] = new Vector2((v.x - bounds.min.x) / bounds.size.x, (v.y - bounds.min.y) / bounds.size.y);
+            }
+
+            mesh.uv = _uvs;
         }
     }
 }

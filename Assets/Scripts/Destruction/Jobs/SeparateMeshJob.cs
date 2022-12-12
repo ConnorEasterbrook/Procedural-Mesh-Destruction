@@ -36,11 +36,9 @@ namespace Connoreaster
 
         [ReadOnly] private NativeArray<Vector3> meshVerts;
         [ReadOnly] private NativeArray<Vector3> meshNormals;
-        [ReadOnly] private NativeArray<Vector2> meshUVS;
 
         [NativeDisableParallelForRestriction] public NativeArray<Vector3> triVerts;
         [NativeDisableParallelForRestriction] public NativeArray<Vector3> triNorms;
-        [NativeDisableParallelForRestriction] public NativeArray<Vector2> triUVs;
 
         [ReadOnly] private Plane plane;
         [NativeDisableParallelForRestriction] public NativeArray<bool> triangleLeftSide;
@@ -55,11 +53,9 @@ namespace Connoreaster
 
             meshVerts = new NativeArray<Vector3>(mesh.vertices, Allocator.TempJob);
             meshNormals = new NativeArray<Vector3>(mesh.normals, Allocator.TempJob);
-            meshUVS = new NativeArray<Vector2>(mesh.uv, Allocator.TempJob);
 
             triVerts = new NativeArray<Vector3>(subMeshTris.Length, Allocator.TempJob);
             triNorms = new NativeArray<Vector3>(subMeshTris.Length, Allocator.TempJob);
-            triUVs = new NativeArray<Vector2>(subMeshTris.Length, Allocator.TempJob);
 
             this.plane = plane;
             triangleLeftSide = new NativeArray<bool>(subMeshTris.Length, Allocator.TempJob);
@@ -81,10 +77,6 @@ namespace Connoreaster
             triNorms[iterator + 1] = meshNormals[triangleIndexB];
             triNorms[iterator + 2] = meshNormals[triangleIndexC];
 
-            triUVs[iterator] = meshUVS[triangleIndexA];
-            triUVs[iterator + 1] = meshUVS[triangleIndexB];
-            triUVs[iterator + 2] = meshUVS[triangleIndexC];
-
             triangleLeftSide[iterator] = plane.GetSide(meshVerts[triangleIndexA]);
             triangleLeftSide[iterator + 1] = plane.GetSide(meshVerts[triangleIndexB]);
             triangleLeftSide[iterator + 2] = plane.GetSide(meshVerts[triangleIndexC]);
@@ -96,11 +88,9 @@ namespace Connoreaster
 
             meshVerts.Dispose();
             meshNormals.Dispose();
-            meshUVS.Dispose();
 
             triVerts.Dispose();
             triNorms.Dispose();
-            triUVs.Dispose();
 
             triangleLeftSide.Dispose();
         }

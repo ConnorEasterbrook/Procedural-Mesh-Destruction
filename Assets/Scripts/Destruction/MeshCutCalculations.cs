@@ -60,14 +60,12 @@ namespace Connoreaster
 
         private Vector3[][] vertsToAdd;
         private Vector3[][] normsToAdd;
-        private Vector2[][] uvsToAdd;
         private bool[][] triangleLeftSide;
         int batchCount = 1;
 
         /// <summary>
         /// Iterates through the triangles of all the submeshes of the original mesh and splits them into two meshes
         /// </summary>
-        // private void SeparateMeshes(GeneratedMeshData mesh1, GeneratedMeshData mesh2, int[] hitGameObjectSubMeshTriangles, int i, int j)
         private void SeparateMeshes()
         {
             int iterator = 0;
@@ -99,7 +97,6 @@ namespace Connoreaster
 
                 vertsToAdd = new Vector3[subMeshTriangleCount][];
                 normsToAdd = new Vector3[subMeshTriangleCount][];
-                uvsToAdd = new Vector2[subMeshTriangleCount][];
                 triangleLeftSide = new bool[subMeshTriangleCount][];
 
                 SeparateMeshJob job = new SeparateMeshJob(i, sentGameObjectMesh, hitGameObjectSubMeshTriangles, slicePlane);
@@ -115,7 +112,6 @@ namespace Connoreaster
 
                     vertsToAdd[iterator] = new Vector3[3];
                     normsToAdd[iterator] = new Vector3[3];
-                    uvsToAdd[iterator] = new Vector2[3];
                     triangleLeftSide[iterator] = new bool[3];
 
                     vertsToAdd[iterator][0] = job.triVerts[j];
@@ -126,15 +122,11 @@ namespace Connoreaster
                     normsToAdd[iterator][1] = job.triNorms[j + 1];
                     normsToAdd[iterator][2] = job.triNorms[j + 2];
 
-                    uvsToAdd[iterator][0] = job.triUVs[j];
-                    uvsToAdd[iterator][1] = job.triUVs[j + 1];
-                    uvsToAdd[iterator][2] = job.triUVs[j + 2];
-
                     triangleLeftSide[iterator][0] = job.triangleLeftSide[j];
                     triangleLeftSide[iterator][1] = job.triangleLeftSide[j + 1];
                     triangleLeftSide[iterator][2] = job.triangleLeftSide[j + 2];
 
-                    triangle = new MeshTriangleData(vertsToAdd[iterator], normsToAdd[iterator], uvsToAdd[iterator], i); // Create a new triangle with the job data
+                    triangle = new MeshTriangleData(vertsToAdd[iterator], normsToAdd[iterator], i); // Create a new triangle with the job data
 
                     switch (triangleLeftSide[iterator][0])
                     {
@@ -169,8 +161,8 @@ namespace Connoreaster
             belongsToMesh1.Add(triangleLeftSide[iterator][1]); // Add the second vertex to the list
             belongsToMesh1.Add(triangleLeftSide[iterator][2]); // Add the third vertex to the list
 
-            MeshTriangleData mesh1Triangle = new MeshTriangleData(new Vector3[2], new Vector3[2], new Vector2[2], triangle.subMeshIndex); // Stores the vertices of the first triangle
-            MeshTriangleData mesh2Triangle = new MeshTriangleData(new Vector3[2], new Vector3[2], new Vector2[2], triangle.subMeshIndex); // Stores the vertices of the second triangle
+            MeshTriangleData mesh1Triangle = new MeshTriangleData(new Vector3[2], new Vector3[2], triangle.subMeshIndex); // Stores the vertices of the first triangle
+            MeshTriangleData mesh2Triangle = new MeshTriangleData(new Vector3[2], new Vector3[2], triangle.subMeshIndex); // Stores the vertices of the second triangle
 
             FindCorrectSides(mesh1Triangle, mesh2Triangle, belongsToMesh1);
             TestTriangles(mesh1Triangle, mesh2Triangle);
@@ -199,16 +191,12 @@ namespace Connoreaster
                         mesh1Triangle.normals[0] = triangle.normals[i]; // Make the first normal of the triangle match the current normal iteration
                         mesh1Triangle.normals[1] = mesh1Triangle.normals[0]; // Add the second normal of the triangle to match the first
 
-                        mesh1Triangle.UVs[0] = triangle.UVs[i]; // Make the first UV of the triangle match the current UV iteration
-                        mesh1Triangle.UVs[1] = mesh1Triangle.UVs[0]; // Add the second UV of the triangle to match the first
-
                         mesh1Side = true; // Set the mesh1Side to true so that we can increase the iteration and place the second vertex correctly.
                     }
                     else
                     {
                         mesh1Triangle.vertices[1] = triangle.vertices[i]; // Make the second vertex of the triangle match the current vertex iteration
                         mesh1Triangle.normals[1] = triangle.normals[i]; // Make the second normal of the triangle match the current normal iteration
-                        mesh1Triangle.UVs[1] = triangle.UVs[i]; // Make the second UV of the triangle match the current UV iteration
                     }
                 }
                 else
@@ -221,16 +209,12 @@ namespace Connoreaster
                         mesh2Triangle.normals[0] = triangle.normals[i]; // Make the first normal of the triangle match the current normal iteration
                         mesh2Triangle.normals[1] = mesh2Triangle.normals[0]; // Add the second normal of the triangle to match the first
 
-                        mesh2Triangle.UVs[0] = triangle.UVs[i]; // Make the first UV of the triangle match the current UV iteration
-                        mesh2Triangle.UVs[1] = mesh2Triangle.UVs[0]; // Add the second UV of the triangle to match the first
-
                         mesh2Side = true; // Set the mesh2Side to true so that we can increase the iteration and place the second vertex correctly.
                     }
                     else
                     {
                         mesh2Triangle.vertices[1] = triangle.vertices[i]; // Make the second vertex of the triangle match the current vertex iteration
                         mesh2Triangle.normals[1] = triangle.normals[i]; // Make the second normal of the triangle match the current normal iteration
-                        mesh2Triangle.UVs[1] = triangle.UVs[i]; // Make the second UV of the triangle match the current UV iteration
                     }
                 }
             }
@@ -249,34 +233,31 @@ namespace Connoreaster
             normalizedDistance = distance / (mesh2Triangle.vertices[0] - mesh1Triangle.vertices[0]).magnitude; // Get the normalized distance from the first vertex to the plane
             Vector3 mesh1Vert = Vector3.Lerp(mesh1Triangle.vertices[0], mesh2Triangle.vertices[0], normalizedDistance); // Get the vertex on the plane
             Vector3 mesh1Normal = Vector3.Lerp(mesh1Triangle.normals[0], mesh2Triangle.normals[0], normalizedDistance); // Get the normal on the plane
-            Vector2 mesh1UV = Vector2.Lerp(mesh1Triangle.UVs[0], mesh2Triangle.UVs[0], normalizedDistance); // Get the UV on the plane
             newVertices.Add(mesh1Vert); // Add the vertex to the list of vertices
 
             slicePlane.Raycast(new Ray(mesh1Triangle.vertices[1], (mesh2Triangle.vertices[1] - mesh1Triangle.vertices[1]).normalized), out distance); // Get the distance from the second vertex to the plane
             normalizedDistance = distance / (mesh2Triangle.vertices[1] - mesh1Triangle.vertices[1]).magnitude; // Get the normalized distance from the second vertex to the plane
             Vector3 mesh2Vert = Vector3.Lerp(mesh1Triangle.vertices[1], mesh2Triangle.vertices[1], normalizedDistance); // Get the vertex on the plane
             Vector3 mesh2Normal = Vector3.Lerp(mesh1Triangle.normals[1], mesh2Triangle.normals[1], normalizedDistance); // Get the normal on the plane
-            Vector2 mesh2UV = Vector2.Lerp(mesh1Triangle.UVs[1], mesh2Triangle.UVs[1], normalizedDistance); // Get the UV on the plane
             newVertices.Add(mesh2Vert); // Add the vertex to the list of vertices
 
             bool isEven = false;
-            AddToMesh(mesh1, mesh1Triangle, mesh1Vert, mesh2Vert, mesh1Normal, mesh2Normal, mesh1UV, mesh2UV, isEven); // Add the triangle to the mesh
-            AddToMesh(mesh2, mesh2Triangle, mesh1Vert, mesh2Vert, mesh1Normal, mesh2Normal, mesh1UV, mesh2UV, isEven); // Add the triangle to the mesh
+            AddToMesh(mesh1, mesh1Triangle, mesh1Vert, mesh2Vert, mesh1Normal, mesh2Normal, isEven); // Add the triangle to the mesh
+            AddToMesh(mesh2, mesh2Triangle, mesh1Vert, mesh2Vert, mesh1Normal, mesh2Normal, isEven); // Add the triangle to the mesh
 
             isEven = true;
-            AddToMesh(mesh1, mesh1Triangle, mesh2Vert, mesh1Vert, mesh2Normal, mesh1Normal, mesh2UV, mesh1UV, isEven); // Add the triangle to the mesh
-            AddToMesh(mesh2, mesh2Triangle, mesh2Vert, mesh1Vert, mesh2Normal, mesh1Normal, mesh2UV, mesh1UV, isEven); // Add the triangle to the mesh
+            AddToMesh(mesh1, mesh1Triangle, mesh2Vert, mesh1Vert, mesh2Normal, mesh1Normal, isEven); // Add the triangle to the mesh
+            AddToMesh(mesh2, mesh2Triangle, mesh2Vert, mesh1Vert, mesh2Normal, mesh1Normal, isEven); // Add the triangle to the mesh
         }
 
         /// <summary>
         /// An obtuse function to cut down on code size. Assigns the triangle data to the correct mesh
         /// </summary>
-        private void AddToMesh(GeneratedMeshData mesh, MeshTriangleData meshTriangle, Vector3 meshVert, Vector3 _meshVert, Vector3 meshNormal, Vector3 _meshNormal, Vector2 meshUV, Vector2 _meshUV, bool isEven)
+        private void AddToMesh(GeneratedMeshData mesh, MeshTriangleData meshTriangle, Vector3 meshVert, Vector3 _meshVert, Vector3 meshNormal, Vector3 _meshNormal, bool isEven)
         {
             // Triangle test variables
             Vector3[] updatedVertices; // Create a new array of vertices for the triangle
             Vector3[] updatedNormals; // Create a new array of normals for the triangle
-            Vector2[] updatedUVs; // Create a new array of UVs for the triangle
             MeshTriangleData testTriangle; // Create a new triangle with the updated data
 
             // Conditional to determine which calculations to use
@@ -284,15 +265,13 @@ namespace Connoreaster
             {
                 updatedVertices = new Vector3[] { meshTriangle.vertices[0], meshTriangle.vertices[1], meshVert };
                 updatedNormals = new Vector3[] { meshTriangle.normals[0], meshTriangle.normals[1], meshNormal };
-                updatedUVs = new Vector2[] { meshTriangle.UVs[0], meshTriangle.UVs[1], meshUV };
-                testTriangle = new MeshTriangleData(updatedVertices, updatedNormals, updatedUVs, triangle.subMeshIndex);
+                testTriangle = new MeshTriangleData(updatedVertices, updatedNormals, triangle.subMeshIndex);
             }
             else
             {
                 updatedVertices = new Vector3[] { meshTriangle.vertices[0], meshVert, _meshVert };
                 updatedNormals = new Vector3[] { meshTriangle.normals[0], meshNormal, _meshNormal };
-                updatedUVs = new Vector2[] { meshTriangle.UVs[0], meshUV, _meshUV };
-                testTriangle = new MeshTriangleData(updatedVertices, updatedNormals, updatedUVs, triangle.subMeshIndex);
+                testTriangle = new MeshTriangleData(updatedVertices, updatedNormals, triangle.subMeshIndex);
             }
 
             // If our vertices are not the same, then we can add the triangle to the mesh
@@ -387,57 +366,24 @@ namespace Connoreaster
 
             centerPosition /= polygonVertices.Count; // Set the center position to the average of all the vertices
 
-            // Create an upward axis used to determine the orientation of the plane
-            Vector3 up = new Vector3()
-            {
-                x = slicePlane.normal.x,
-                y = slicePlane.normal.y,
-                z = slicePlane.normal.z
-            };
-
-            Vector3 left = Vector3.Cross(slicePlane.normal, up); // Create a left axis used to determine the orientation of the plane
-
-            Vector3 displacement = Vector3.zero; // Create a new vector for the displacement
-            Vector2 uv1 = Vector2.zero; // Create a new vector for the first UV
-            Vector2 uv2 = Vector2.zero; // Create a new vector for the second UV
-
             // Loop through all the vertices in the polygon
             for (int i = 0; i < polygonVertices.Count; i++)
             {
-                displacement = polygonVertices[i] - centerPosition; // Set the displacement to the difference between the vertex and the center position
-
-                // Set the UVs to the dot product of the displacement and the left and up axes
-                uv1 = new Vector2()
-                {
-                    x = 0.5f + Vector3.Dot(displacement, left),
-                    y = 0.5f + Vector3.Dot(displacement, up)
-                };
-
-                displacement = polygonVertices[(i + 1) % polygonVertices.Count] - centerPosition; // Set the displacement to the difference between the next vertex and the center position
-
-                // Set the UVs to the dot product of the displacement and the left and up axes
-                uv2 = new Vector2()
-                {
-                    x = .5f + Vector3.Dot(displacement, left),
-                    y = .5f + Vector3.Dot(displacement, up)
-                };
-
                 bool isMesh1 = true;
-                CheckFillFlip(mesh1, polygonVertices, centerPosition, uv1, uv2, isMesh1, i); // Check if the fill should be flipped for the first mesh
+                CheckFillFlip(mesh1, polygonVertices, centerPosition, isMesh1, i); // Check if the fill should be flipped for the first mesh
 
                 isMesh1 = false;
-                CheckFillFlip(mesh2, polygonVertices, centerPosition, uv1, uv2, isMesh1, i); // Check if the fill should be flipped for the second mesh
+                CheckFillFlip(mesh2, polygonVertices, centerPosition, isMesh1, i); // Check if the fill should be flipped for the second mesh
             }
         }
 
         /// <summary>
         /// Check if the fill should be flipped
         /// </summary>
-        private void CheckFillFlip(GeneratedMeshData mesh, List<Vector3> polygonVertices, Vector3 centerPosition, Vector2 uv1, Vector2 uv2, bool isMesh1, int index)
+        private void CheckFillFlip(GeneratedMeshData mesh, List<Vector3> polygonVertices, Vector3 centerPosition, bool isMesh1, int index)
         {
             Vector3[] _vertices = { polygonVertices[index], polygonVertices[(index + 1) % polygonVertices.Count], centerPosition }; // Create an array of vertices and set the first two to the current and next vertex and the third to the center position
             Vector3[] _normals;
-            Vector2[] _uvs = { uv1, uv2, new(0.5f, 0.5f) }; // Create an array of UVs and set the first two to the UVs and the third to the center UV
 
             if (isMesh1)
             {
@@ -448,7 +394,7 @@ namespace Connoreaster
                 _normals = new[] { slicePlane.normal, slicePlane.normal, slicePlane.normal }; // Set all three normals to the positive normal of the slice plane
             }
 
-            MeshTriangleData fillTriangle = new MeshTriangleData(_vertices, _normals, _uvs, sentGameObjectMesh.subMeshCount + 1); // Create a new triangle using the previous arrays
+            MeshTriangleData fillTriangle = new MeshTriangleData(_vertices, _normals, sentGameObjectMesh.subMeshCount + 1); // Create a new triangle using the previous arrays
 
             // If the Dot Cross product is negative then the triangle needs to be flipped
             if (Vector3.Dot(Vector3.Cross(_vertices[1] - _vertices[0], _vertices[2] - _vertices[0]), _normals[0]) < 0)
@@ -471,7 +417,6 @@ namespace Connoreaster
         private void CreateFirstMesh(GameObject hitGameObject)
         {
             Mesh completeMesh1 = mesh1.GetGeneratedMesh();
-            RecalculateUVs(completeMesh1); // Recalculate the UVs of the first mesh
 
             // Remove all current colliders on the object to avoid duplicates and update the mesh bounds
             Collider[] originalCols = hitGameObject.GetComponents<Collider>();
@@ -505,7 +450,6 @@ namespace Connoreaster
         private void CreateSecondMesh(GameObject hitGameObject)
         {
             Mesh completeMesh2 = mesh2.GetGeneratedMesh();
-            RecalculateUVs(completeMesh2); // Recalculate the UVs of the second mesh
 
             secondMeshGO = new GameObject(); // Create a new game object for the second mesh
             secondMeshGO.tag = "Sliceable"; // Set the tag to sliceable
@@ -541,7 +485,6 @@ namespace Connoreaster
 
             AddRigidBody(secondMeshGO); // Add a rigidbody to the second mesh
 
-
             if (hitGameObject.tag == "Limb")
             {
                 DismemberHelper _helper = new DismemberHelper(); // Create a new dismember helper
@@ -559,21 +502,6 @@ namespace Connoreaster
             {
                 DeleteAfterSeven(secondMeshGO);
             }
-        }
-
-        private void RecalculateUVs(Mesh mesh)
-        {
-            Bounds bounds = mesh.bounds;
-            Vector3[] vertices = mesh.vertices;
-            Vector2[] uvs = new Vector2[vertices.Length];
-
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                Vector3 v = vertices[i];
-                uvs[i] = new Vector2((v.x - bounds.min.x) / bounds.size.x, (v.y - bounds.min.y) / bounds.size.y);
-            }
-
-            mesh.uv = uvs;
         }
 
         private void AddMaterial(Mesh mesh, GameObject hitGameObject, GameObject newGameObject, bool isMesh1)
@@ -606,8 +534,6 @@ namespace Connoreaster
                 }
                 else
                 {
-                    // newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
-
                     if (innerMat != null)
                     {
                         newMats[i] = innerMat;
