@@ -40,7 +40,6 @@ namespace Connoreaster
         private MeshTriangleData triangle;
         public DebugController debugController;
 
-        // private List<GameObject> shatterGOList = new List<GameObject>();
         private GameObject[] shatterGOList;
         private float _FJStrength = 100;
 
@@ -48,44 +47,42 @@ namespace Connoreaster
         {
             if (collision.gameObject.tag == "Sliceable" || collision.gameObject.tag == "Limb")
             {
-                // ContactPoint contact = collision.contacts[0];
-                // Vector3 pos = contact.point;
-                // Quaternion rot = Quaternion.FromToRotation(Vector3.up, contact.normal);
-
-                // if (!isShattered)
-                // {
+                ContactPoint contact = collision.GetContact(0);
                 shatterGOList = new GameObject[shatterIterations];
 
                 for (int i = 0; i < shatterIterations; i++)
                 {
-                    Cut(collision.gameObject, i);
+                    Cut(collision.gameObject, i, contact);
                 }
-
-                // shatterGOList[shatterIterations].GetComponent<Rigidbody>().AddExplosionForce(explodeForce, collision.contacts[0].point, 5f);
-                // shatterGOList.Clear();
-                // }
             }
         }
 
         /// <summary>
         /// Cut the mesh using a plane
         /// </summary>
-        public void Cut(GameObject hitObject, int iteration)
+        public void Cut(GameObject hitObject, int iteration, ContactPoint _CP)
         {
             gameObjectMesh = hitObject.GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
 
-            // Create a plane at a random point on the mesh
-            slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3
-            (
-                gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
-                UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
-                gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2
-            ));
+            Vector3 _CPPos = hitObject.transform.InverseTransformPoint(_CP.point);
+
+            if (iteration == 0)
+            {
+                slicePlane = new Plane(UnityEngine.Random.onUnitSphere, _CPPos);
+            }
+            else
+            {
+                slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3
+                (
+                    gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
+                    UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
+                    gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2
+                ));
+            }
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
             calc.CallScript(hitObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
             GameObject newGameObject = calc.secondMeshGO; // Get the second game object from the mesh cut calculations script
-            // shatterGOList.Add(newGameObject); // Add the second game object to the list of shattered game objects
             shatterGOList[iteration] = newGameObject;
 
             if (iteration == 0)
