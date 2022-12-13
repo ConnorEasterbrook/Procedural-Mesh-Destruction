@@ -39,7 +39,7 @@ namespace Connoreaster
         public GeneratedMeshData mesh2;
         private List<Vector3> newVertices;
         private MeshTriangleData triangle;
-        private GameObject secondMeshGO;
+        public GameObject secondMeshGO;
         private float explodeForce = 250f;
         private bool debugColour = false;
 
@@ -89,7 +89,6 @@ namespace Connoreaster
             {
                 batchCount = 1;
             }
-
 
             // Iterate through all the submeshes
             for (int i = 0; i < sentGameObjectMesh.subMeshCount; i++)

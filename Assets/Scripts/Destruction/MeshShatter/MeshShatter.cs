@@ -28,9 +28,9 @@ namespace Connoreaster
 {
     public class MeshShatter : MonoBehaviour
     {
-        [Range(1, 8)] public float shatterIterations = 4;
+        [Range(1, 8)] public int shatterIterations = 4;
         private bool isShattered = false;
-        public float explodeForce = 250f;
+        public float explodeForce = 0f;
 
         private static Mesh gameObjectMesh;
         private Plane slicePlane;
@@ -40,24 +40,37 @@ namespace Connoreaster
         private MeshTriangleData triangle;
         public DebugController debugController;
 
+        // private List<GameObject> shatterGOList = new List<GameObject>();
+        private GameObject[] shatterGOList;
+        private float _FJStrength = 100;
+
         void OnCollisionEnter(Collision collision)
         {
             if (collision.gameObject.tag == "Sliceable" || collision.gameObject.tag == "Limb")
             {
-                if (!isShattered)
+                // ContactPoint contact = collision.contacts[0];
+                // Vector3 pos = contact.point;
+                // Quaternion rot = Quaternion.FromToRotation(Vector3.up, contact.normal);
+
+                // if (!isShattered)
+                // {
+                shatterGOList = new GameObject[shatterIterations];
+
+                for (int i = 0; i < shatterIterations; i++)
                 {
-                    for (int i = 0; i < shatterIterations; i++)
-                    {
-                        Cut(collision.gameObject);
-                    }
+                    Cut(collision.gameObject, i);
                 }
+
+                // shatterGOList[shatterIterations].GetComponent<Rigidbody>().AddExplosionForce(explodeForce, collision.contacts[0].point, 5f);
+                // shatterGOList.Clear();
+                // }
             }
         }
 
         /// <summary>
         /// Cut the mesh using a plane
         /// </summary>
-        public void Cut(GameObject hitObject)
+        public void Cut(GameObject hitObject, int iteration)
         {
             gameObjectMesh = hitObject.GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
 
@@ -71,6 +84,27 @@ namespace Connoreaster
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
             calc.CallScript(hitObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
+            GameObject newGameObject = calc.secondMeshGO; // Get the second game object from the mesh cut calculations script
+            // shatterGOList.Add(newGameObject); // Add the second game object to the list of shattered game objects
+            shatterGOList[iteration] = newGameObject;
+
+            if (iteration == 0)
+            {
+                FixedJoint _FJ = newGameObject.AddComponent<FixedJoint>();
+                _FJ.connectedBody = hitObject.GetComponent<Rigidbody>();
+                _FJ.breakForce = _FJStrength;
+                _FJ.breakTorque = _FJStrength;
+            }
+            else
+            {
+                Debug.Log("Iteration: " + iteration);
+                // newGameObject.AddComponent<FixedJoint>().connectedBody = shatterGOList[iteration - 1].GetComponent<Rigidbody>();
+                FixedJoint _FJ = newGameObject.AddComponent<FixedJoint>();
+                _FJ.connectedBody = shatterGOList[iteration - 1].GetComponent<Rigidbody>();
+                _FJ.breakForce = _FJStrength;
+                _FJ.breakTorque = _FJStrength;
+            }
+
         }
     }
 }
