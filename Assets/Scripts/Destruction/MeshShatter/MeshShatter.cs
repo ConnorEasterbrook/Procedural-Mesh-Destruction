@@ -91,15 +91,15 @@ namespace Connoreaster
                 _FJ.connectedBody = hitObject.GetComponent<Rigidbody>();
                 _FJ.breakForce = _FJStrength;
                 _FJ.breakTorque = _FJStrength;
+                _FJ.massScale = 0.1f;
             }
             else
             {
-                Debug.Log("Iteration: " + iteration);
-                // newGameObject.AddComponent<FixedJoint>().connectedBody = shatterGOList[iteration - 1].GetComponent<Rigidbody>();
                 FixedJoint _FJ = newGameObject.AddComponent<FixedJoint>();
                 _FJ.connectedBody = shatterGOList[iteration - 1].GetComponent<Rigidbody>();
                 _FJ.breakForce = _FJStrength;
                 _FJ.breakTorque = _FJStrength;
+                _FJ.massScale = 0.1f;
             }
 
         }
