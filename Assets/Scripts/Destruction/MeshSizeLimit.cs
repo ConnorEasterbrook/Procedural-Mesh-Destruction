@@ -35,7 +35,16 @@ namespace Connoreaster
         // Update is called once per frame
         void Update()
         {
-            Mesh gameObjectMesh = GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
+            Mesh gameObjectMesh = new Mesh();
+
+            if (gameObject.GetComponent<MeshFilter>() == null)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                gameObjectMesh = GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
+            }
 
             // Check if the object is a plane or not to shatter properly
             if (!isPlane)

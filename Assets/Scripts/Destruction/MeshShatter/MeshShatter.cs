@@ -29,15 +29,7 @@ namespace Connoreaster
     public class MeshShatter : MonoBehaviour
     {
         [Range(1, 8)] public int shatterIterations = 4;
-        private bool isShattered = false;
-        public float explodeForce = 0f;
-
         private static Mesh gameObjectMesh;
-        private Plane slicePlane;
-        private GeneratedMeshData mesh1;
-        private GeneratedMeshData mesh2;
-        private List<Vector3> newVertices;
-        private MeshTriangleData triangle;
         public DebugController debugController;
 
         private GameObject[] shatterGOList;
@@ -45,14 +37,19 @@ namespace Connoreaster
 
         void OnCollisionEnter(Collision collision)
         {
-            if (collision.gameObject.tag == "Sliceable" || collision.gameObject.tag == "Limb")
+            if (gameObject.tag == "Weapon")
             {
-                ContactPoint contact = collision.GetContact(0);
-                shatterGOList = new GameObject[shatterIterations];
-
-                for (int i = 0; i < shatterIterations; i++)
+                if (collision.gameObject.tag == "Sliceable" || collision.gameObject.tag == "Limb")
                 {
-                    Cut(collision.gameObject, i, contact);
+                    ContactPoint contact = collision.GetContact(0);
+                    shatterGOList = new GameObject[shatterIterations];
+
+                    for (int i = 0; i < shatterIterations; i++)
+                    {
+                        Cut(collision.gameObject, i, contact);
+                    }
+
+                    gameObject.tag = "Untagged";
                 }
             }
         }
@@ -62,6 +59,7 @@ namespace Connoreaster
         /// </summary>
         public void Cut(GameObject hitObject, int iteration, ContactPoint _CP)
         {
+            Plane slicePlane = new Plane(); // Create a new plane
             gameObjectMesh = hitObject.GetComponent<MeshFilter>().mesh; // Get the mesh of the game object
 
             Vector3 _CPPos = hitObject.transform.InverseTransformPoint(_CP.point);
