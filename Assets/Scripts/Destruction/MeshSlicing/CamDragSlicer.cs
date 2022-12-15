@@ -36,8 +36,6 @@ namespace Connoreaster
         // MESH CUTTING VARIABLES
         private Plane slicePlane;
         private Vector3 mousePoint;
-        public float explodeForce = 250f;
-        public bool debugColour = false;
         private bool slicing;
         public GameObject tip;
         public GameObject baseOfWeapon;
@@ -45,7 +43,6 @@ namespace Connoreaster
         private Vector3 baseEnterPos;
         private Vector3 exitPos;
         private ParticleSystem ps;
-        public DebugController debugController;
 
         private void Awake()
         {
@@ -134,7 +131,7 @@ namespace Connoreaster
                 ps = hitGameObject.GetComponentInChildren<ParticleSystem>();
                 ps.Play();
                 MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-                calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
+                calc.CallScript(hitGameObject, slicePlane); // Call the mesh cut calculations script
             }
         }
     }

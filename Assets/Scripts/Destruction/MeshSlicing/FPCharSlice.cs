@@ -29,15 +29,12 @@ namespace Connoreaster
     public class FPCharSlice : MonoBehaviour
     {
         private Plane slicePlane;
-        public float explodeForce = 250f;
 
         public GameObject tip;
         public GameObject baseOfWeapon;
         private Vector3 enterPos;
         private Vector3 baseEnterPos;
         private Vector3 exitPos;
-
-        public DebugController debugController;
 
         private void OnTriggerEnter(Collider other)
         {
@@ -88,7 +85,7 @@ namespace Connoreaster
         private void Cut(GameObject hitGameObject)
         {
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
+            calc.CallScript(hitGameObject, slicePlane); // Call the mesh cut calculations script
 
         }
     }

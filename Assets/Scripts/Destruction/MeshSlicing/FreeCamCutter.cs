@@ -39,8 +39,6 @@ namespace Connoreaster
         private Plane slicePlane;
         private Vector3 mouseDownPos;
         private Vector3 mouseUpPos;
-        public float explodeForce = 250f;
-        public bool debugColour = false;
 
         private void Awake()
         {
@@ -142,7 +140,7 @@ namespace Connoreaster
             slicePlane = new Plane(hitGameObject.transform.InverseTransformDirection(-planeNormal), hitGameObject.transform.InverseTransformPoint(planePoint)); // Create a new plane
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitGameObject, slicePlane, explodeForce, debugColour); // Call the mesh cut calculations script
+            calc.CallScript(hitGameObject, slicePlane); // Call the mesh cut calculations script
         }
     }
 }

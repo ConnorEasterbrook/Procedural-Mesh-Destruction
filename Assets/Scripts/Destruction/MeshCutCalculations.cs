@@ -40,18 +40,14 @@ namespace Connoreaster
         private List<Vector3> newVertices;
         private MeshTriangleData triangle;
         public GameObject secondMeshGO;
-        private float explodeForce = 250f;
-        private bool debugColour = false;
 
-        public void CallScript(GameObject _sentGameObject, Plane _slicePlane, float _explodeForce, bool _debugColour)
+        public void CallScript(GameObject _sentGameObject, Plane _slicePlane)
         {
             sentGameObjectMesh = _sentGameObject.GetComponent<MeshFilter>().mesh;
             slicePlane = _slicePlane;
             mesh1 = new GeneratedMeshData(); // Create a new mesh data object for the first mesh
             mesh2 = new GeneratedMeshData(); // Create a new mesh data object for the second mesh
             newVertices = new List<Vector3>(); // Create a new list of vertices for the new mesh caused by slicing
-            explodeForce = _explodeForce;
-            debugColour = _debugColour;
 
             SeparateMeshes();
             
@@ -60,8 +56,6 @@ namespace Connoreaster
 
             MeshCreationCalculations meshCreationCalculations = new MeshCreationCalculations(this, mesh1.GetGeneratedMesh(), mesh2.GetGeneratedMesh(), secondMeshGO);
             secondMeshGO = meshCreationCalculations.CallScript(_sentGameObject);
-
-            // CreateFirstMesh(_sentGameObject);
         }
 
         private Vector3[][] vertsToAdd;

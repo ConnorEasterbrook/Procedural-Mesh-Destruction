@@ -81,7 +81,7 @@ namespace Connoreaster
             }
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
-            calc.CallScript(hitObject, slicePlane, explodeForce, debugController.debugColourSlice); // Call the mesh cut calculations script
+            calc.CallScript(hitObject, slicePlane); // Call the mesh cut calculations script
             GameObject newGameObject = calc.secondMeshGO; // Get the second game object from the mesh cut calculations script
             shatterGOList[iteration] = newGameObject;
 
