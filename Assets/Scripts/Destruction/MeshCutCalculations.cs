@@ -401,39 +401,58 @@ namespace Connoreaster
                 innerMat = hitGameObject.GetComponent<InnerMaterial>().innerMaterial; // Get the inner material of the original object
             }
 
-            for (int i = 0; i < mesh.subMeshCount; i++)
+            for (int i = 0; i < oldMats.Length; i++)
             {
-                if (oldMats.Length > i)
-                {
-                    if (oldMats[i] != null)
-                    {
-                        newMats[i] = oldMats[i]; // Set the material to the original material
-                    }
+                newMats[i] = oldMats[i]; // Set the material to the original material
+            }
 
-                    if (debugColour)
-                    {
-                        Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
-                        newMats[i].color = colorPicker;
-                    }
+            for (int i = oldMats.Length; i < mesh.subMeshCount; i++)
+            {
+                if (innerMat != null)
+                {
+                    newMats[i] = innerMat;
                 }
                 else
                 {
-                    if (innerMat != null)
-                    {
-                        newMats[i] = innerMat;
-                    }
-                    else
-                    {
-                        newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
-                    }
-
-                    if (debugColour)
-                    {
-                        Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
-                        newMats[i].color = colorPicker;
-                    }
+                    newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material;
                 }
             }
+
+            // for (int i = 0; i < mesh.subMeshCount; i++)
+            // {
+            //     if (oldMats.Length > i)
+            //     {
+            //         if (oldMats[i] != null)
+            //         {
+            //             newMats[i] = oldMats[i]; // Set the material to the original material
+            //         }
+
+            //         if (debugColour)
+            //         {
+            //             Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
+            //             newMats[i].color = colorPicker;
+            //         }
+            //     }
+            //     else
+            //     {
+            //         if (innerMat != null)
+            //         {
+            //             newMats[i] = innerMat;
+            //         }
+            //         else
+            //         {
+            //             newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material; // Set the material to the original material
+            //         }
+
+            //         // newMats[i] = hitGameObject.GetComponent<MeshRenderer>().material;
+
+            //         if (debugColour)
+            //         {
+            //             Color colorPicker = new Color(Random.value, Random.value, Random.value, 1.0f); // Create a new color for the second object
+            //             newMats[i].color = colorPicker;
+            //         }
+            //     }
+            // }
 
             // meshRenderer.materials = newMats; // Set the materials to the new array of materials
             newGameObject.AddComponent<InnerMaterial>().innerMaterial = hitGameObject.GetComponent<InnerMaterial>().innerMaterial;
