@@ -44,7 +44,7 @@ namespace Connoreaster
                     ContactPoint contact = collision.GetContact(0);
                     shatterGOList = new GameObject[shatterIterations];
 
-                    for (int i = 0; i < shatterIterations; i++)
+                    for (int i = 0; i < shatterIterations; i += 2)
                     {
                         Cut(collision.gameObject, i, contact);
                     }
@@ -66,20 +66,37 @@ namespace Connoreaster
 
             if (iteration == 0)
             {
-                slicePlane = new Plane(UnityEngine.Random.onUnitSphere, _CPPos);
+                slicePlane = new Plane(Random.onUnitSphere, _CPPos);
             }
             else
             {
-                slicePlane = new Plane(UnityEngine.Random.onUnitSphere, new Vector3
+                slicePlane = new Plane(Random.onUnitSphere, new Vector3
                 (
                     gameObjectMesh.bounds.min.x + gameObjectMesh.bounds.size.x / 2,
-                    UnityEngine.Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
+                    Random.Range(gameObjectMesh.bounds.min.y, gameObjectMesh.bounds.max.y),
                     gameObjectMesh.bounds.min.z + gameObjectMesh.bounds.size.z / 2
                 ));
             }
 
             MeshCutCalculations calc = new MeshCutCalculations(); // Create a new mesh cut calculations object
             calc.CallScript(hitObject, slicePlane); // Call the mesh cut calculations script
+
+            Mesh mesh2 = calc.mesh2.GetGeneratedMesh();
+            if (iteration == 0)
+            {
+                slicePlane = new Plane(Random.onUnitSphere, _CPPos);
+            }
+            else
+            {
+                slicePlane = new Plane(Random.onUnitSphere, new Vector3
+                (
+                    mesh2.bounds.min.x + mesh2.bounds.size.x / 2,
+                    Random.Range(mesh2.bounds.min.y, mesh2.bounds.max.y),
+                    mesh2.bounds.min.z + mesh2.bounds.size.z / 2
+                ));
+            }
+
+            calc.CallScript(calc.secondMeshGO, slicePlane); // Call the mesh cut calculations script (again
             GameObject newGameObject = calc.secondMeshGO; // Get the second game object from the mesh cut calculations script
             shatterGOList[iteration] = newGameObject;
 

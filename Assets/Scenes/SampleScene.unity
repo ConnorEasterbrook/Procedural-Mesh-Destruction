@@ -6896,7 +6896,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   shatterIterations: 4
-  explodeForce: 250
   debugController: {fileID: 0}
 --- !u!64 &482589282
 MeshCollider:
@@ -8974,7 +8973,7 @@ FixedJoint:
   m_BreakTorque: 100
   m_EnableCollision: 0
   m_EnablePreprocessing: 1
-  m_MassScale: 1
+  m_MassScale: 0.00001
   m_ConnectedMassScale: 1
 --- !u!64 &887706676
 MeshCollider:
@@ -15829,6 +15828,7 @@ GameObject:
   - component: {fileID: 1394621540}
   - component: {fileID: 1394621538}
   - component: {fileID: 1394621539}
+  - component: {fileID: 1394621541}
   m_Layer: 0
   m_Name: Cube
   m_TagString: Sliceable
@@ -15912,7 +15912,7 @@ Rigidbody:
   m_Mass: 1
   m_Drag: 0
   m_AngularDrag: 0.05
-  m_UseGravity: 0
+  m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
@@ -15944,6 +15944,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isPlane: 0
+--- !u!138 &1394621541
+FixedJoint:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1394621532}
+  m_ConnectedBody: {fileID: 887706677}
+  m_ConnectedArticulationBody: {fileID: 0}
+  m_BreakForce: 100
+  m_BreakTorque: 100
+  m_EnableCollision: 0
+  m_EnablePreprocessing: 1
+  m_MassScale: 0.00001
+  m_ConnectedMassScale: 1
 --- !u!1 &1427808558
 GameObject:
   m_ObjectHideFlags: 0

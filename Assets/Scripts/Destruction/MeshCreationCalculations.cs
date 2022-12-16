@@ -80,7 +80,7 @@ namespace Connoreaster
                 DeleteAfterSeven(hitGameObject);
             }
 
-            AddRigidBody(hitGameObject); // Add a rigidbody to the second mesh
+            AddRigidBody(hitGameObject, hitGameObject); // Add a rigidbody to the second mesh
         }
 
         private void CreateSecondMesh(GameObject hitGameObject)
@@ -113,11 +113,11 @@ namespace Connoreaster
 
                 if (!col.convex)
                 {
-                    col.gameObject.SetActive(false);
+                    MonoBehaviour.Destroy(col.gameObject);
                 }
             }
 
-            AddRigidBody(secondMeshGO); // Add a rigidbody to the second mesh
+            AddRigidBody(secondMeshGO, hitGameObject); // Add a rigidbody to the second mesh
 
             if (hitGameObject.tag == "Limb")
             {
@@ -153,7 +153,14 @@ namespace Connoreaster
 
             for (int i = 0; i < oldMats.Length; i++)
             {
-                newMats[i] = oldMats[i]; // Set the material to the original material
+                if (mesh.subMeshCount != 0)
+                {
+                    newMats[i] = oldMats[i]; // Set the material to the original material
+                }
+                else
+                {
+                    MonoBehaviour.Destroy(newGameObject);
+                }
             }
 
             for (int i = oldMats.Length; i < mesh.subMeshCount; i++)
@@ -173,11 +180,12 @@ namespace Connoreaster
             newGameObject.GetComponent<MeshRenderer>().materials = newMats;
         }
 
-        private void AddRigidBody(GameObject _GO)
+        private void AddRigidBody(GameObject _GO, GameObject hitGameObject)
         {
             if (_GO.GetComponent<Rigidbody>() == null)
             {
-                Rigidbody rightRigidbody = _GO.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
+                Rigidbody secondGORB = _GO.AddComponent<Rigidbody>(); // Add a rigidbody to the second mesh
+                secondGORB.mass = hitGameObject.GetComponent<Rigidbody>().mass; // Set the mass of the second mesh to the mass of the first mesh
                 // rightRigidbody.AddRelativeForce(-slicePlane.normal * explodeForce); // Add a force to the second mesh in the opposite direction of the slice plane for effect
             }
             else
