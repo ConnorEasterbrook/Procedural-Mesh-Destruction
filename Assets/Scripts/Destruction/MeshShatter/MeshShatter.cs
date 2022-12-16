@@ -44,7 +44,7 @@ namespace Connoreaster
                     ContactPoint contact = collision.GetContact(0);
                     shatterGOList = new GameObject[shatterIterations];
 
-                    for (int i = 0; i < shatterIterations; i += 2)
+                    for (int i = 0; i < shatterIterations; i++)
                     {
                         Cut(collision.gameObject, i, contact);
                     }
